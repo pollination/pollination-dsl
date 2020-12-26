@@ -12,11 +12,12 @@ A Python DSL to create Queenbee Plugins as Python packages and Queenbee Recipes 
 ## Function
 
 ```python
-from queenbee_dsl.function import function, command, Inputs, Outputs
+from dataclasses import dataclass
+from queenbee_dsl.function import Function, command, Inputs, Outputs
 
 
-@function
-class CreateOctreeWithSky:
+@dataclass
+class CreateOctreeWithSky(Function):
     """Generate an octree from a Radiance folder and sky!"""
 
     # inputs
@@ -49,7 +50,8 @@ class CreateOctreeWithSky:
 
 ```
 
-Try `print(CreateOctreeWithSky.yaml())` and you should see the Queenbee definition:
+The Queenbee class is accessible from `queenbee` property. Try `print(CreateOctreeWithSky().queenbee.yaml())` and
+you should see the Queenbee definition:
 
 ```yaml
 type: Function
@@ -111,6 +113,9 @@ description: Generate an octree from a Radiance folder and sky!
 command: honeybee-radiance octree from-folder model --output scene.oct --{{inputs.include-aperture}}-aperture
   --{{inputs.black-out}} --add-before sky.sky
 ```
+
+Since the functions are standard Python classes you can also subclass them from one
+another.
 
 ## Plugin
 

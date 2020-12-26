@@ -3,7 +3,7 @@ import pkgutil
 import importlib
 import pathlib
 from queenbee.plugin.plugin import Plugin, PluginConfig, MetaData
-from queenbee.plugin.function import Function
+from .function import Function
 
 
 def load(package_name: str) -> Plugin:
@@ -19,7 +19,7 @@ def load(package_name: str) -> Plugin:
     # collect queenbee functions
     module = importlib.import_module(package_name)
     assert hasattr(module, '__queenbee__'), \
-        'Failed to fine __queenbee__ info in __init__.py'
+        'Failed to find __queenbee__ info in __init__.py'
     qb_info = getattr(module, '__queenbee__')
 
     # get metadata
@@ -35,8 +35,11 @@ def load(package_name: str) -> Plugin:
         module = importlib.import_module('.' + name, package_name)
         for attr in dir(module):
             loaded_attr = getattr(module, attr)
-            if isinstance(loaded_attr, Function):
-                functions.append(loaded_attr)
+            if hasattr(loaded_attr, '__decorator__') and \
+                    getattr(loaded_attr, '__decorator__') == 'function':
+                if loaded_attr is Function:
+                    continue
+                functions.append(loaded_attr().queenbee)
 
     plugin = Plugin(config=config, metadata=metadata, functions=functions)
     return plugin
