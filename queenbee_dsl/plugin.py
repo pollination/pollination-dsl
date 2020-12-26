@@ -14,7 +14,7 @@ def load(package_name: str) -> Plugin:
             in the environment that this command being executed.
 
     returns:
-        Plugin - A Queenbeee plugin
+        Plugin - A Queenbee plugin
     """
     # collect queenbee functions
     module = importlib.import_module(package_name)
