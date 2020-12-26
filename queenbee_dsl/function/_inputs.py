@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from dataclasses import dataclass
 from queenbee.io.inputs.function import (
     FunctionStringInput, FunctionIntegerInput, FunctionNumberInput,
@@ -43,6 +43,9 @@ class _InputBase(BaseModel):
         if hasattr(self, 'path'):
             data['path'] = self.path
 
+        if hasattr(self, 'extensions'):
+            data['extensions'] = self.extensions
+
         return func.parse_obj(data)
 
 
@@ -74,10 +77,10 @@ class FolderInput(StringInput):
 
 
 class FileInput(FolderInput):
-    ...
+    extensions: List[str] = None
 
 
-class PathInput(FolderInput):
+class PathInput(FileInput):
     ...
 
 
