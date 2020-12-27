@@ -39,6 +39,10 @@ class _OutputBase(BaseModel):
         }
         return func.parse_obj(data)
 
+    @property
+    def is_artifact(self):
+        return False
+
 
 class StringOutput(_OutputBase):
     path: str
@@ -63,7 +67,10 @@ class DictOutput(StringOutput):
 
 
 class FolderOutput(StringOutput):
-    ...
+
+    @property
+    def is_artifact(self):
+        return True
 
 
 class FileOutput(FolderOutput):
