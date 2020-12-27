@@ -7,6 +7,11 @@ import importlib
 from queenbee.plugin.function import Function as QBFunction
 
 
+def camel_to_snake(name: str) -> str:
+    """Change name from CamelCase to snake-case."""
+    return name[0].lower() + \
+        ''.join(['-' + x.lower() if x.isupper() else x for x in name][1:])
+
 @dataclass
 class Function:
     """Baseclass for DSL Function classes."""
@@ -14,6 +19,7 @@ class Function:
     _cached_queenbee = None
     _cached_outputs = None
     _cached_package = None
+    _cached_inputs = None
 
     @property
     def queenbee(self) -> QBFunction:
@@ -24,8 +30,7 @@ class Function:
 
         cls = self.__class__
 
-        name = cls.__name__[0].lower() + \
-            ''.join(['-' + x.lower() if x.isupper() else x for x in cls.__name__][1:])
+        name = camel_to_snake(cls.__name__)
         description = cls.__doc__
         command = None
         inputs = []
@@ -54,6 +59,31 @@ class Function:
         return self._cached_queenbee
 
     @property
+    def _inputs(self) -> NamedTuple:
+        """Return function inputs as a simple object with dot notation.
+
+        Use this property to access the inputs when creating a DAG.
+
+        The name starts with a _ not to conflict with a possible member of the class
+        with the name inputs.
+        """
+        if self._cached_inputs:
+            return self._cached_inputs
+        cls_name = camel_to_snake(self.__class__.__name__)
+        mapper = {
+            inp.name.replace('-', '_'): {
+                'name': inp.name.replace('-', '_'),
+                'parent': cls_name,
+                'value': inp
+            } for inp in self.queenbee.inputs
+        }
+
+        inputs = namedtuple('Inputs', list(mapper.keys()))
+        self._cached_inputs = inputs(*list(mapper.values()))
+
+        return self._cached_inputs
+
+    @property
     def _outputs(self) -> NamedTuple:
         """Return function outputs as a simple object with dot notation.
 
@@ -64,8 +94,13 @@ class Function:
         """
         if self._cached_outputs:
             return self._cached_outputs
-
-        mapper = {out.name: out for out in self.queenbee.outputs}
+        cls_name = camel_to_snake(self.__class__.__name__)
+        mapper = {
+            out.name.replace('-', '_'): {
+                'name': out.name.replace('-', '_'),
+                'parent': cls_name, 'value': out
+            } for out in self.queenbee.outputs
+        }
         outputs = namedtuple('Outputs', list(mapper.keys()))
         self._cached_outputs = outputs(*list(mapper.values()))
 
