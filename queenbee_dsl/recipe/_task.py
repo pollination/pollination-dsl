@@ -4,7 +4,7 @@ import inspect
 from collections import namedtuple
 from typing import Dict, List
 
-from queenbee.recipe.dag import DAGTask
+from queenbee.recipe.task import DAGTask, DAGTaskLoop
 from queenbee.io.outputs.task import TaskReturn, TaskPathReturn
 from queenbee.io.inputs.task import TaskArguments, TaskArgument, TaskPathArgument
 
@@ -46,6 +46,34 @@ def _add_sub_path(arg: Dict, sub_paths: Dict) -> Dict:
     return arg
 
 
+def _get_from(value, inputs_info):
+    """Return a Queenbee from value.
+
+    The output will be an InputReference, TaskReference or a ValueReference or a
+    ValueListReference.
+
+    Args:
+        name: Reference object name.
+        value: Reference object.
+        inputs_info: Recipe inputs info to get the information for RecipeInput types.
+
+    """
+    if isinstance(value, RecipeInput):
+        variable = inputs_info[id(value)]
+        return {'type': value.reference_type, 'variable': variable}
+    try:
+        # only TaskReference has parent
+        parent = value['parent']
+    except TypeError:
+        # value
+        assert False, 'value reference is not implemeneted.'
+    else:
+        # Task reference values and names are nested
+        variable = value['name']
+        value = value['value']
+        return {'type': value.reference_type, 'name': parent, 'variable': variable}
+
+
 def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
     """Get task arguments as Queenbee task arguments."""
     task_args = []
@@ -61,39 +89,19 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
     values = func_args.defaults
 
     for name, value_info in zip(names, values):
+        from_ = _get_from(value_info, inputs_info)
+        arg_dict = {'name': name, 'from': from_}
+        arg_dict = _add_sub_path(arg_dict, sub_paths)
         if isinstance(value_info, RecipeInput):
-            variable = inputs_info[id(value_info)]
             if value_info.is_artifact:
                 # file, folder, path
-                type_mapper = {
-                    RecipeInputs.file: 'InputFileReference',
-                    RecipeInputs.folder: 'InputFolderReference',
-                    RecipeInputs.path: 'InputPathReference'
-                }
-                arg_dict = {
-                    'name': name,
-                    'type': 'TaskPathArgument',
-                    'from': {
-                        'type': type_mapper[type(value_info)],
-                        'variable': variable
-                    }
-                }
-                arg_dict = _add_sub_path(arg_dict, sub_paths)
                 arg = TaskPathArgument.parse_obj(arg_dict)
             else:
-                arg_dict = {
-                    'name': name,
-                    'type': 'TaskArgument',
-                    'from': {
-                        'type': 'InputReference',
-                        'variable': variable
-                    }
-                }
-                arg_dict = _add_sub_path(arg_dict, sub_paths)
                 arg = TaskArgument.parse_obj(arg_dict)
         else:
             # task or value
             try:
+                # only TaskReference has parent
                 parent = value_info['parent']
             except TypeError:
                 # value
@@ -101,42 +109,22 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
             else:
                 # tasks
                 value = value_info['value']
-                variable = value_info['name']
                 if value.is_artifact:
-                    # file, folder or path - TaskPathArgument
-                    # TODO: add these values as a property to function output types
-                    type_mapper = {
-                        TaskOutputs.file: 'TaskFileReference',
-                        TaskOutputs.folder: 'TaskFolderReference',
-                        TaskOutputs.path: 'TaskPathReference'
-                    }
-                    arg_dict = {
-                        'name': name,
-                        'type': 'TaskPathArgument',
-                        'from': {
-                            'type': type_mapper[type(value)],
-                            'name': parent,
-                            'variable': variable
-                        }
-                    }
-                    arg_dict = _add_sub_path(arg_dict, sub_paths)
                     arg = TaskPathArgument.parse_obj(arg_dict)
                 else:
                     # parameter
-                    arg_dict = {
-                        'name': name, 'type': 'TaskArgument',
-                        'from': {
-                            'type': 'TaskReference',
-                            'name': parent,
-                            'variable': variable
-                        }
-                    }
-                    arg_dict = _add_sub_path(arg_dict, sub_paths)
                     arg = TaskArgument.parse_obj(arg_dict)
-
         task_args.append(arg)
 
     return task_args
+
+
+def _get_task_loop(value, inputs_info) -> DAGTaskLoop:
+    """Get TaskLoop as a queenbee TaskLoop."""
+    if not value:
+        return None
+    from_ = _get_from(value, inputs_info)
+    return DAGTaskLoop.parse_obj({'from': from_})
 
 
 def _get_task_returns(func) -> NamedTuple:
@@ -187,7 +175,6 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
                 f'Invalid input type for needs: {need}. A task can only rely on ' \
                 'another task in the same recipe.'
 
-        # TODO: Add checks for loop object
         func.__task_loop__ = loop
 
         func.__task_annotations__ = annotations or {}
@@ -209,6 +196,7 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
             # TODO: validate arguments against needs to ensure all the task names are
             # included in needs.
             task_arguments = _get_task_arguments(method, dag_inputs, sub_paths)
+            task_loop = _get_task_loop(method.__task_loop__, dag_inputs)
             task_returns = []
             for out in returns:
                 from_ = out.get('from', None)
@@ -229,7 +217,7 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
 
             return DAGTask(
                 name=name, template=template, needs=task_needs, arguments=task_arguments,
-                returns=task_returns
+                returns=task_returns, loop=task_loop
             )
 
         func.to_queenbee = to_queenbee

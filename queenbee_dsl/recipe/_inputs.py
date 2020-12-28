@@ -49,6 +49,10 @@ class _InputBase(BaseModel):
     def is_artifact(self):
         return False
 
+    @property
+    def reference_type(self):
+        return 'InputReference'
+
 
 class StringInput(_InputBase):
     annotations: Dict = None
@@ -79,13 +83,24 @@ class FolderInput(StringInput):
     def is_artifact(self):
         return True
 
+    @property
+    def reference_type(self):
+        return 'InputFolderReference'
+
 
 class FileInput(FolderInput):
     extensions: List[str] = None
 
+    @property
+    def reference_type(self):
+        return 'InputFileReference'
+
 
 class PathInput(FileInput):
-    ...
+
+    @property
+    def reference_type(self):
+        return 'InputPathReference'
 
 
 @dataclass
