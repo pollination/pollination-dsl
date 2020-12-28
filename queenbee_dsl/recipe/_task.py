@@ -38,7 +38,15 @@ def _validate_task_args(func) -> None:
         )
 
 
-def _get_task_arguments(func, inputs_info) -> List[TaskArguments]:
+def _add_sub_path(arg: Dict, sub_paths: Dict) -> Dict:
+    """Add the sub_path field to an argument."""
+    if arg['name'] in sub_paths:
+        arg['sub_path'] = sub_paths[arg['name']]
+
+    return arg
+
+
+def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
     """Get task arguments as Queenbee task arguments."""
     task_args = []
     template = func.__task_template__
@@ -70,6 +78,7 @@ def _get_task_arguments(func, inputs_info) -> List[TaskArguments]:
                         'variable': variable
                     }
                 }
+                arg_dict = _add_sub_path(arg_dict, sub_paths)
                 arg = TaskPathArgument.parse_obj(arg_dict)
             else:
                 arg_dict = {
@@ -80,6 +89,7 @@ def _get_task_arguments(func, inputs_info) -> List[TaskArguments]:
                         'variable': variable
                     }
                 }
+                arg_dict = _add_sub_path(arg_dict, sub_paths)
                 arg = TaskArgument.parse_obj(arg_dict)
         else:
             # task or value
@@ -109,6 +119,7 @@ def _get_task_arguments(func, inputs_info) -> List[TaskArguments]:
                             'variable': variable
                         }
                     }
+                    arg_dict = _add_sub_path(arg_dict, sub_paths)
                     arg = TaskPathArgument.parse_obj(arg_dict)
                 else:
                     # parameter
@@ -120,6 +131,7 @@ def _get_task_arguments(func, inputs_info) -> List[TaskArguments]:
                             'variable': variable
                         }
                     }
+                    arg_dict = _add_sub_path(arg_dict, sub_paths)
                     arg = TaskArgument.parse_obj(arg_dict)
 
         task_args.append(arg)
@@ -145,8 +157,12 @@ def _get_task_returns(func) -> NamedTuple:
     return outputs(*list(mapper.values()))
 
 
-def task(template, needs=None, loop=None, sub_folder=None, annotations=None):
+def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = None,
+         annotations=None):
     """A decorator for task methods in a DAG."""
+
+    sub_paths = sub_paths or {}
+    sub_paths = {key.replace('-', '_'): value for key, value in sub_paths.items()}
 
     def task_func(func):
         # add __decorator___ so I can find the tasks later in the class decorator
@@ -190,8 +206,9 @@ def task(template, needs=None, loop=None, sub_folder=None, annotations=None):
             task_needs = [
                 need.__name__.replace('_', '-') for need in method.__task_needs__
             ]
-            task_arguments = []
-            task_arguments = _get_task_arguments(method, dag_inputs)
+            # TODO: validate arguments against needs to ensure all the task names are
+            # included in needs.
+            task_arguments = _get_task_arguments(method, dag_inputs, sub_paths)
             task_returns = []
             for out in returns:
                 from_ = out.get('from', None)
