@@ -93,7 +93,7 @@ class Recipe:
 
         module = importlib.import_module(self._python_package)
         assert hasattr(module, '__queenbee__'), \
-            'Failed to find __queenbee__ info in __init__.py'
+            f'Failed to find __queenbee__ info in {module.__name__}\'s __init__.py'
         self._cached_package = getattr(module, '__queenbee__')
         return self._cached_package
 
