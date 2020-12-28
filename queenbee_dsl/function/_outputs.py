@@ -43,6 +43,10 @@ class _OutputBase(BaseModel):
     def is_artifact(self):
         return False
 
+    @property
+    def reference_type(self):
+        return 'TaskReference'
+
 
 class StringOutput(_OutputBase):
     path: str
@@ -72,13 +76,21 @@ class FolderOutput(StringOutput):
     def is_artifact(self):
         return True
 
+    @property
+    def reference_type(self):
+        return 'TaskFolderReference'
+
 
 class FileOutput(FolderOutput):
-    ...
+    @property
+    def reference_type(self):
+        return 'TaskFileReference'
 
 
 class PathOutput(FolderOutput):
-    ...
+    @property
+    def reference_type(self):
+        return 'TaskPathReference'
 
 
 @dataclass
