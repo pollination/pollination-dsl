@@ -6,6 +6,10 @@ from queenbee.io.outputs.function import (
     FunctionPathOutput, FunctionJSONObjectOutput
 )
 from queenbee.base.basemodel import BaseModel
+from queenbee.base.parser import parse_double_quotes_vars
+
+from pydantic import validator
+
 
 __all__ = ('Outputs', )
 
@@ -52,6 +56,15 @@ class StringOutput(_OutputBase):
     path: str
     annotations: Dict = None
     description: str = None
+
+    @validator('path')
+    def change_self_to_inputs(cls, v):
+        refs = parse_double_quotes_vars(v)
+        for ref in refs:
+            v = v.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return v
 
 
 class IntegerOutput(StringOutput):
