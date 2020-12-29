@@ -7,10 +7,9 @@ from typing import Dict, List
 from queenbee.recipe.task import DAGTask, DAGTaskLoop
 from queenbee.io.outputs.task import TaskReturn, TaskPathReturn
 from queenbee.io.inputs.task import TaskArguments, TaskArgument, TaskPathArgument
+from queenbee.base.parser import parse_double_quotes_vars
 
 from ._inputs import _InputBase as RecipeInput
-from ._inputs import Inputs as RecipeInputs
-from ..function._outputs import Outputs as TaskOutputs
 
 
 def camel_to_snake(name: str) -> str:
@@ -66,7 +65,7 @@ def _get_from(value, inputs_info):
         parent = value['parent']
     except TypeError:
         # value
-        assert False, 'value reference is not implemeneted.'
+        return {}
     else:
         # Task reference values and names are nested
         variable = value['name']
@@ -98,22 +97,36 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
                 arg = TaskPathArgument.parse_obj(arg_dict)
             else:
                 arg = TaskArgument.parse_obj(arg_dict)
-        else:
+        elif from_ != {}:
             # task or value
-            try:
-                # only TaskReference has parent
-                parent = value_info['parent']
-            except TypeError:
-                # value
-                assert False, f'value not implemeneted: {name}'
+            # tasks
+            value = value_info['value']
+            if value.is_artifact:
+                arg = TaskPathArgument.parse_obj(arg_dict)
             else:
-                # tasks
-                value = value_info['value']
-                if value.is_artifact:
-                    arg = TaskPathArgument.parse_obj(arg_dict)
+                # parameter
+                arg = TaskArgument.parse_obj(arg_dict)
+        else:
+            # value reference
+            func_input = getattr(template._inputs, name)['value']
+            if func_input.is_artifact:
+
+                arg_dict['from']['path'] = value_info
+
+                if func_input.type == 'FunctionFolderInput':
+                    # folder
+                    arg_dict['from']['type'] = 'ValueFolderReference'
                 else:
-                    # parameter
-                    arg = TaskArgument.parse_obj(arg_dict)
+                    # file
+                    arg_dict['from']['type'] = 'ValueFileReference'
+
+                arg = TaskPathArgument.parse_obj(arg_dict)
+            else:
+                # value reference
+                arg_dict['from']['value'] = value_info
+                arg_dict['from']['type'] = 'ValueReference'
+                arg = TaskArgument.parse_obj(arg_dict)
+
         task_args.append(arg)
 
     return task_args
@@ -133,7 +146,14 @@ def _get_task_returns(func) -> NamedTuple:
     pattern = r'[\'\"]from[\'\"]\s*:\s*.*\._outputs\.(\S*)\s*[,}]'
     parent = func.__name__.replace('_', '-')
     src = inspect.getsource(func)
-    matches = re.findall(pattern, src)
+    # remove the last } which happens in case of parameters input. Somene who
+    # knows regex better than I do should be able to fix this by changing the pattern
+    # here is an example to recreate the issue.
+    #   return [
+    #       {'from': SplitGrid()._outputs.grids_list},
+    #       {'from': SplitGrid()._outputs.output_folder, 'to': 'sub_grids'}
+    #  ]
+    matches = [match.replace('}', '') for match in re.findall(pattern, src)]
     mapper = {
         match: {
             'name': match.replace('_', '-'),
@@ -207,6 +227,13 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
                     assert to_ is not None, 'Missing \'to\' key for {from_.name}. ' \
                         'All file and folder returns must provide a target path using ' \
                         'the `to` key.'
+                    if to_:
+                        # find and replace referenced values
+                        refs = parse_double_quotes_vars(to_)
+                        for ref in refs:
+                            to_ = to_.replace(
+                                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+                            )
                     return_ = TaskPathReturn(
                         name=from_.name, description=description, path=to_
                     )
