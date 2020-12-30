@@ -205,11 +205,19 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
 
         # assign to_queenbee function to task as an inner function
         # this functions will be called when DAG object generates DAGTasks
-        def to_queenbee(method, returns: List[Dict], dag_inputs: Dict[int, str]):
+        def to_queenbee(
+                method, returns: List[Dict], dag_inputs: Dict[int, str], dag_package: str
+                ):
             """Convert a task method to a Queenbee DAGTask."""
             name = method.__name__.replace('_', '-')
             tt = method.__task_template__
-            template = f'{tt._package["name"]}/{camel_to_snake(tt.__class__.__name__)}'
+            if tt.__decorator__ == 'dag' and tt._package == dag_package:
+                # template is another dag in the same plugin (AKA package)
+                template = f'{camel_to_snake(tt.__class__.__name__)}'
+            else:
+                template = \
+                    f'{tt._package["name"]}/{camel_to_snake(tt.__class__.__name__)}'
+
             task_needs = [
                 need.__name__.replace('_', '-') for need in method.__task_needs__
             ]
