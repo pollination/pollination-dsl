@@ -6,12 +6,15 @@ import importlib
 
 from queenbee.recipe.dag import DAG
 
+from ..common import camel_to_snake
+
 
 @dataclass
 class Recipe:
     """Baseclass for DSL Recipe classes."""
     __decorator__ = 'recipe'
     _cached_queenbee = None
+    _cached_inputs = None
     _cached_outputs = None
     _cached_package = None
 
@@ -28,7 +31,7 @@ class Recipe:
             ''.join(['-' + x.lower() if x.isupper() else x for x in cls.__name__][1:])
 
         # create a mapper for inputs and use it to track back the name of the inputs
-        # when creating a task reference.
+        # when creating a task reference by using the id of the assigned item.
         inputs_dict = {}
         for method_name, method in inspect.getmembers(cls):
             # try to get decorator
@@ -60,8 +63,33 @@ class Recipe:
         self._cached_queenbee = DAG(
             name=name, inputs=inputs, tasks=tasks, outputs=outputs
         )
-
         return self._cached_queenbee
+
+    @property
+    def _inputs(self) -> NamedTuple:
+        """Return function inputs as a simple object with dot notation.
+
+        Use this property to access the inputs when creating a DAG.
+
+        The name starts with a _ not to conflict with a possible member of the class
+        with the name inputs.
+        """
+        if self._cached_inputs:
+            return self._cached_inputs
+
+        cls_name = camel_to_snake(self.__class__.__name__)
+        mapper = {
+            inp.name.replace('-', '_'): {
+                'name': inp.name.replace('-', '_'),
+                'parent': cls_name,
+                'value': inp
+            } for inp in self.queenbee.inputs
+        }
+
+        inputs = namedtuple('Inputs', list(mapper.keys()))
+        self._cached_inputs = inputs(*list(mapper.values()))
+
+        return self._cached_inputs
 
     @property
     def _outputs(self) -> NamedTuple:

@@ -208,6 +208,8 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
         def to_queenbee(method, returns: List[Dict], dag_inputs: Dict[int, str]):
             """Convert a task method to a Queenbee DAGTask."""
             name = method.__name__.replace('_', '-')
+            # TODO: only add package name for functions or recipes from a different
+            # package. For the same package only add the name.
             tt = method.__task_template__
             template = f'{tt._package["name"]}/{camel_to_snake(tt.__class__.__name__)}'
             task_needs = [
@@ -218,7 +220,7 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
             task_arguments = _get_task_arguments(method, dag_inputs, sub_paths)
             task_loop = _get_task_loop(method.__task_loop__, dag_inputs)
             task_returns = []
-            for out in returns:
+            for out in returns or []:
                 from_ = out.get('from', None)
                 from_ = from_['value'] if from_ else from_
                 to_ = out.get('to', None)
