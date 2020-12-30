@@ -9,7 +9,7 @@ from queenbee.io.outputs.task import TaskReturn, TaskPathReturn
 from queenbee.io.inputs.task import TaskArguments, TaskArgument, TaskPathArgument
 from queenbee.base.parser import parse_double_quotes_vars
 
-from ._inputs import _InputBase as RecipeInput
+from ._inputs import _InputBase as DAGInput
 
 
 def camel_to_snake(name: str) -> str:
@@ -54,10 +54,10 @@ def _get_from(value, inputs_info):
     Args:
         name: Reference object name.
         value: Reference object.
-        inputs_info: Recipe inputs info to get the information for RecipeInput types.
+        inputs_info: DAG inputs info to get the information for DAGInput types.
 
     """
-    if isinstance(value, RecipeInput):
+    if isinstance(value, DAGInput):
         variable = inputs_info[id(value)]
         return {'type': value.reference_type, 'variable': variable}
     try:
@@ -91,7 +91,7 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
         from_ = _get_from(value_info, inputs_info)
         arg_dict = {'name': name, 'from': from_}
         arg_dict = _add_sub_path(arg_dict, sub_paths)
-        if isinstance(value_info, RecipeInput):
+        if isinstance(value_info, DAGInput):
             if value_info.is_artifact:
                 # file, folder, path
                 arg = TaskPathArgument.parse_obj(arg_dict)
@@ -176,15 +176,15 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
         # add __decorator___ so I can find the tasks later in the class decorator
         func.__decorator__ = 'task'
         # set up task information
-        # a template can only be from type recipe or task
+        # a template can only be from type dag or task
         assert hasattr(template, '__decorator__') and \
-            getattr(template, '__decorator__') in {'function', 'recipe'}, \
+            getattr(template, '__decorator__') in {'function', 'dag'}, \
             f'Invalid input type for template: {template}\n' \
-            'A template must be either a Function or a Recipe.'
+            'A template must be either a Function or a DAG.'
         func.__task_template__ = template()
 
         # technically a task should have _returns but I _felt_ it will be easier
-        # for user to use _outputs here to keep it similar to Function and Recipe.
+        # for user to use _outputs here to keep it similar to Function and DAG.
         func._outputs = _get_task_returns(func)
 
         # check tasks that this task relies on
@@ -193,7 +193,7 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
             assert hasattr(need, '__decorator__') and \
                 getattr(need, '__decorator__') == 'task', \
                 f'Invalid input type for needs: {need}. A task can only rely on ' \
-                'another task in the same recipe.'
+                'another task in the same dag.'
 
         func.__task_loop__ = loop
 
@@ -204,12 +204,10 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
         _validate_task_args(func)
 
         # assign to_queenbee function to task as an inner function
-        # this functions will be called when Recipe object generates DAGTasks
+        # this functions will be called when DAG object generates DAGTasks
         def to_queenbee(method, returns: List[Dict], dag_inputs: Dict[int, str]):
             """Convert a task method to a Queenbee DAGTask."""
             name = method.__name__.replace('_', '-')
-            # TODO: only add package name for functions or recipes from a different
-            # package. For the same package only add the name.
             tt = method.__task_template__
             template = f'{tt._package["name"]}/{camel_to_snake(tt.__class__.__name__)}'
             task_needs = [
