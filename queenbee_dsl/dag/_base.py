@@ -51,7 +51,7 @@ class DAG:
                 continue
             if qb_dec == 'task':
                 tasks.append(
-                    method.to_queenbee(method, method(cls), inputs_dict)
+                    method.to_queenbee(method, method(cls), inputs_dict, self._package)
                 )
             elif qb_dec == 'input':
                 inputs.append(method.to_queenbee(name=method_name))
