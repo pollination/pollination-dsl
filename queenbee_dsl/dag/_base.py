@@ -4,24 +4,24 @@ import inspect
 from collections import namedtuple
 import importlib
 
-from queenbee.recipe.dag import DAG
+from queenbee.recipe.dag import DAG as QBDAG
 
 from ..common import camel_to_snake
 
 
 @dataclass
-class Recipe:
-    """Baseclass for DSL Recipe classes."""
-    __decorator__ = 'recipe'
+class DAG:
+    """Baseclass for DSL DAG classes."""
+    __decorator__ = 'dag'
     _cached_queenbee = None
     _cached_inputs = None
     _cached_outputs = None
     _cached_package = None
 
     @property
-    def queenbee(self) -> DAG:
+    def queenbee(self) -> QBDAG:
         """Convert this class to a Queenbee class."""
-        # cache the Recipe since it always stays the same for each instance
+        # cache the DAG since it always stays the same for each instance
         if self._cached_queenbee:
             return self._cached_queenbee
 
@@ -60,7 +60,7 @@ class Recipe:
             else:
                 raise ValueError(f'Unsupported __decorator__: {qb_dec}')
 
-        self._cached_queenbee = DAG(
+        self._cached_queenbee = QBDAG(
             name=name, inputs=inputs, tasks=tasks, outputs=outputs
         )
         return self._cached_queenbee
@@ -93,7 +93,7 @@ class Recipe:
 
     @property
     def _outputs(self) -> NamedTuple:
-        """Return recipe outputs as a simple object with dot notation.
+        """Return dag outputs as a simple object with dot notation.
 
         Use this property to access the outputs when creating a DAG.
 
@@ -113,7 +113,7 @@ class Recipe:
     def _package(self) -> dict:
         """Queenbee package information.
 
-        This information will only be available if the recipe is part of a Python
+        This information will only be available if the dag is part of a Python
         package.
         """
         if self._cached_package:
@@ -127,9 +127,9 @@ class Recipe:
 
     @property
     def _python_package(self) -> str:
-        """Python package information for this recipe.
+        """Python package information for this dag.
 
-        This information will only be available if the recipe is part of a Python
+        This information will only be available if the dag is part of a Python
         package.
         """
         return self.__module__.split('.')[0]
