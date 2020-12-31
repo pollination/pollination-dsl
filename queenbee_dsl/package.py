@@ -187,6 +187,8 @@ def write(
         ) -> str:
     """Write Queenbee plugin or recipe from Python package to a folder.
 
+    BakedRecipes are written to a single file.
+
     args:
         package_name: Python package name. The package must be installed
             in the environment that this command being executed.
@@ -196,8 +198,13 @@ def write(
         readme: Readme contents as a string.
 
     returns:
-        str -- path to plugin folder
+        str -- path to the generated folder or file.
     """
     qb_object = load(package_name, baked=baked)
-    qb_object.to_folder(folder_path=target_folder, readme_string=readme)
-    return target_folder
+    if baked and isinstance(qb_object, BakedRecipe):
+        recipe_file = pathlib.Path(target_folder, package_name + '.yaml')
+        recipe_file.write_text(qb_object.yaml())
+        return recipe_file.as_posix()
+    else:
+        qb_object.to_folder(folder_path=target_folder, readme_string=readme)
+        return target_folder
