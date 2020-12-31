@@ -130,7 +130,7 @@ Follow the standard way to install a Python package. Once the package is install
 can use `queenbee-dsl` to load the package or write it to a folder.
 
 ```python
-from queenbee_dsl.plugin import load, write_to_folder
+from queenbee_dsl.package import load, write
 
 # name of the queenbee package
 python_package = 'honeybee_radiance_pollination'
@@ -139,9 +139,32 @@ python_package = 'honeybee_radiance_pollination'
 plugin = load(python_package)
 
 # or write the package as a Queenbee plugin to a folder directly
-write_to_folder(python_package, './honeybee-radiance-pollination')
+write(python_package, './honeybee-radiance-pollination')
 
 ```
 
-see [`honeybee-radiance-pollination` plugin](https://github.com/mostaphaRoudsari/honeybee-radiance-pollination)
-for a full project example.
+See [`honeybee-radiance-pollination` plugin](https://github.com/pollination/honeybee-radiance-pollination) for a full project example.
+
+## Recipe
+
+`Recipe` is a collection of `DAG`s. Each `DAG` is a collection of interrelated `task`s.
+You can use queenbee-dsl to create complex recipes with minimum code by reusing the `functions`
+as templates for each task.
+
+Packaging a plugin is exactly the same as packaging a plugin.
+
+```python
+from queenbee_dsl.package import load, write
+
+# name of the queenbee package
+python_package = 'daylight-factor'
+
+# load this package as Queenbee Recipe
+recipe = load(python_package, baked=True)
+
+# or write the package as a Queenbee plugin to a folder directly
+write(python_package, './daylight-factor')
+
+```
+
+See [`daylight factor` recipe](https://github.com/pollination/honeybee-radiance-recipes/tree/master/recipes/daylight-factor) for a full project example.
