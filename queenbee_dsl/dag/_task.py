@@ -89,7 +89,7 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
 
     for name, value_info in zip(names, values):
         from_ = _get_from(value_info, inputs_info)
-        arg_dict = {'name': name, 'from': from_}
+        arg_dict = {'name': name.replace('_', '-'), 'from': from_}
         arg_dict = _add_sub_path(arg_dict, sub_paths)
         if isinstance(value_info, DAGInput):
             if value_info.is_artifact:

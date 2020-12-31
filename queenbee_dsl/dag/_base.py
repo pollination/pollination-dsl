@@ -133,3 +133,33 @@ class DAG:
         package.
         """
         return self.__module__.split('.')[0]
+
+    @property
+    def _dependencies(self):
+        """DAG dependencies.
+
+        Dependencies are plugins or other recipes.
+        """
+        cls = self.__class__
+        dag_package = self._package
+        dependencies = {'plugin': [], 'recipe': [], 'dag': []}
+        for method_name, method in inspect.getmembers(cls):
+            # try to get decorator
+            qb_dec = getattr(method, '__decorator__', None)
+            if qb_dec == 'task':
+                # get template
+                tt = method.__task_template__
+                if tt.__decorator__ == 'dag':
+                    if tt._package == dag_package:
+                        # it's a DAG in the same package.
+                        if tt not in dependencies['dag']:
+                            dependencies['dag'].append(tt)
+                    else:
+                        # dependency is another plugin
+                        if tt._package not in dependencies['recipe']:
+                            dependencies['recipe'].append(tt._package)
+                elif tt.__decorator__ == 'function':
+                    if tt._package not in dependencies['plugin']:
+                        dependencies['plugin'].append(tt._package)
+
+        return dependencies
