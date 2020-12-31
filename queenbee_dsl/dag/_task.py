@@ -39,8 +39,9 @@ def _validate_task_args(func) -> None:
 
 def _add_sub_path(arg: Dict, sub_paths: Dict) -> Dict:
     """Add the sub_path field to an argument."""
-    if arg['name'] in sub_paths:
-        arg['sub_path'] = sub_paths[arg['name']]
+    name = arg['name'].replace('-', '_')
+    if name in sub_paths:
+        arg['sub_path'] = sub_paths[name]
 
     return arg
 
@@ -250,9 +251,12 @@ def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = Non
                     return_ = TaskReturn(name=from_.name, description=description)
                 task_returns.append(return_)
 
+            annotations = method.__task_annotations__
+            sub_folder = method.__task_subfolder__
             return DAGTask(
                 name=name, template=template, needs=task_needs, arguments=task_arguments,
-                returns=task_returns, loop=task_loop
+                returns=task_returns, loop=task_loop, sub_folder=sub_folder,
+                annotations=annotations
             )
 
         func.to_queenbee = to_queenbee
