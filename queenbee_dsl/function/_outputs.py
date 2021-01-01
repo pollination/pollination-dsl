@@ -53,6 +53,14 @@ class _OutputBase(BaseModel):
 
 
 class StringOutput(_OutputBase):
+    """ A Function string output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     path: str
     annotations: Dict = None
     description: str = None
@@ -68,23 +76,62 @@ class StringOutput(_OutputBase):
 
 
 class IntegerOutput(StringOutput):
+    """ A Function integer output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     ...
 
 
 class NumberOutput(StringOutput):
+    """ A Function number output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     ...
 
 
 class BooleanOutput(StringOutput):
+    """ A Function boolean output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     ...
 
 
 class DictOutput(StringOutput):
+    """ A Function dictionary output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     ...
 
 
 class FolderOutput(StringOutput):
+    """ A Function folder output.
 
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source folder for this output.
+
+    """
     @property
     def is_artifact(self):
         return True
@@ -95,12 +142,28 @@ class FolderOutput(StringOutput):
 
 
 class FileOutput(FolderOutput):
+    """ A Function file output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file for this output.
+
+    """
     @property
     def reference_type(self):
         return 'TaskFileReference'
 
 
 class PathOutput(FolderOutput):
+    """ A Function path output. A path can be a file or a folder.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        path: Path to the source file or folder for this output.
+
+    """
     @property
     def reference_type(self):
         return 'TaskPathReference'

@@ -1,9 +1,10 @@
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-from typing import Union, Dict
 import importlib
 import pkgutil
 import pathlib
+
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+from typing import Union
 
 from queenbee.plugin.plugin import Plugin, PluginConfig, MetaData
 from queenbee.recipe.recipe import Recipe, BakedRecipe, Dependency, DependencyKind
@@ -15,7 +16,12 @@ from .function import Function
 
 
 def _init_repo() -> pathlib.Path:
-    """Initiate a local Queenbee repository."""
+    """Initiate a local Queenbee repository.
+
+    This function is used by package function to start a local Queenbee repository
+    if it doesn't exist. If the repository has already been created it will return
+    the path to the repository.
+    """
 
     path = pathlib.Path.home()/'.queenbee'/'queenbee-dsl'
     path.mkdir(exist_ok=True)
@@ -34,6 +40,13 @@ def _init_repo() -> pathlib.Path:
 
 
 class PackageQBInstall(install):
+    """A class to extend `pip install` run method.
+
+    By adding this class to setup.py this package will be added to queenbee-dsl local
+    repository which makes it accessible to other queenbee packages as a dependency.
+
+    See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
+    """
 
     def run(self):
         install.run(self)
@@ -42,6 +55,13 @@ class PackageQBInstall(install):
 
 
 class PackageQBDevelop(develop):
+    """A class to extend `pip install -e` run method.
+
+    By adding this class to setup.py this package will be added to queenbee-dsl local
+    repository which makes it accessible to other queenbee packages as a dependency.
+
+    See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
+    """
 
     def run(self):
         develop.run(self)
@@ -49,16 +69,20 @@ class PackageQBDevelop(develop):
         package(self.__queenbee_name__)
 
 
-def _load_plugin(package_name: str, qb_info: Dict, module) -> Plugin:
+def _load_plugin(module) -> Plugin:
     """Load Queenbee plugin from Python package.
 
+    Usually you should not be using this function directly. Use ``load`` function
+    instead.
+
     args:
-        package_name: Plugin Python package name. The package must be installed
-            in the environment that this command being executed.
+        module: Python module object for a Queenbee Plugin module.
 
     returns:
         Plugin - A Queenbee plugin
     """
+    qb_info = module.__queenbee__
+    package_name = module.__name__
     # get metadata
     config = PluginConfig.parse_obj(qb_info['config'])
     meta_data = dict(qb_info)
@@ -82,8 +106,22 @@ def _load_plugin(package_name: str, qb_info: Dict, module) -> Plugin:
     return plugin
 
 
-def _load_recipe(package_name: str, qb_info: Dict, baked: bool = False):
+def _load_recipe(module, baked: bool = False)-> Union[BakedRecipe, Recipe]:
     # load entry-point DAG
+    """Load Queenbee plugin from Python package.
+
+    Usually you should not be using this function directly. Use ``load`` function
+    instead.
+
+    args:
+        module: Python module object for a Queenbee Recipe.
+
+    returns:
+        Recipe - A Queenbee recipe. It will be a baked recipe if baked is set to True.
+    """
+    qb_info = module.__queenbee__
+    package_name = module.__name__
+
     main_dag = qb_info.get('entry_point', None)()
     assert main_dag, f'{package_name} __queenbee__ info is missing the enetry_point key.'
 
@@ -126,7 +164,11 @@ def _load_recipe(package_name: str, qb_info: Dict, baked: bool = False):
 
 
 def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, Recipe]:
-    """Load Queenbee Plugin or Recipe from Python package."""
+    """Load Queenbee Plugin or Recipe from Python package.
+
+        package_name: Python package name (e.g. honeybee-radiance-pollination)
+        baked: A boolean value to indicate wether to return a Recipe or a BakedRecipe.
+    """
     package_name = package_name.replace('-', '_')
     try:
         module = importlib.import_module(package_name)
@@ -141,15 +183,19 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
     qb_info = getattr(module, '__queenbee__')
     if 'config' in qb_info:
         # it's a plugin
-        # get metadata
-        return _load_plugin(package_name, qb_info, module)
+        return _load_plugin(module)
     else:
         # it's a recipe
-        return _load_recipe(package_name, qb_info, baked)
+        return _load_recipe(module, baked)
 
 
-def package(package_name, readme: str = None):
-    """Package a plugin or a recipe and add it to Queenbee local repository."""
+def package(package_name: str, readme: str = None) -> None:
+    """Package a plugin or a recipe and add it to Queenbee local repository.
+
+        Args:
+            package_name: Python package name (e.g. honeybee-radiance-pollination)
+            readme: Readme contents as a string.
+    """
     # init a Queenbee package
     repository_path = _init_repo()
     index_path = repository_path/'index.json'

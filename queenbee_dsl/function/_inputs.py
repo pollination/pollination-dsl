@@ -50,6 +50,15 @@ class _InputBase(BaseModel):
 
 
 class StringInput(_InputBase):
+    """ A Function string input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     annotations: Dict = None
     description: str = None
     default: str = None
@@ -57,36 +66,104 @@ class StringInput(_InputBase):
 
 
 class IntegerInput(StringInput):
+    """ A Function integer input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: int = None
 
 
 class NumberInput(StringInput):
+    """ A Function number input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: float = None
 
 
 class BooleanInput(StringInput):
+    """ A Function boolean input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: bool = None
 
 
 class DictInput(StringInput):
+    """ A Function dictionary input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: Dict = None
 
 
 class FolderInput(StringInput):
+    """ A Function folder input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        path: Path to source folder.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     path: str
 
 
 class FileInput(FolderInput):
+    """ A Function file input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        extensions: An optional list of valid extensions for input file.
+        path: Path to source folder.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     extensions: List[str] = None
 
 
 class PathInput(FileInput):
+    """ A Function file input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        extensions: An optional list of valid extensions for input file.
+        path: Path to source folder.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     ...
 
 
 @dataclass
 class Inputs:
-    """Function inputs."""
+    """Function inputs enumeration."""
     str = StringInput
     int = IntegerInput
     float = NumberInput

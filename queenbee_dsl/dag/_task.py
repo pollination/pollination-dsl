@@ -10,16 +10,14 @@ from queenbee.io.inputs.task import TaskArguments, TaskArgument, TaskPathArgumen
 from queenbee.base.parser import parse_double_quotes_vars
 
 from ._inputs import _InputBase as DAGInput
-
-
-def camel_to_snake(name: str) -> str:
-    """Change name from CamelCase to snake-case."""
-    return name[0].lower() + \
-        ''.join(['-' + x.lower() if x.isupper() else x for x in name][1:])
+from ..common import camel_to_snake
 
 
 def _validate_task_args(func) -> None:
-    """Validate task arguments."""
+    """Validate task arguments.
+
+    This function ensures that the value for all the task arguments are provided.
+    """
     func_args = inspect.getfullargspec(func)
     arg_names = func_args.args[1:]  # first arg is self
     defaults = func_args.defaults  # default values
@@ -46,17 +44,18 @@ def _add_sub_path(arg: Dict, sub_paths: Dict) -> Dict:
     return arg
 
 
-def _get_from(value, inputs_info):
-    """Return a Queenbee from value.
+def _get_from(value, inputs_info) -> Dict:
+    """Return a Queenbee From value dictionary.
 
     The output will be an InputReference, TaskReference or a ValueReference or a
     ValueListReference.
 
     Args:
-        name: Reference object name.
         value: Reference object.
         inputs_info: DAG inputs info to get the information for DAGInput types.
 
+    Returns:
+        Dict - a Queenbee From value dictionary.
     """
     if isinstance(value, DAGInput):
         variable = inputs_info[id(value)]
@@ -75,12 +74,11 @@ def _get_from(value, inputs_info):
 
 
 def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
-    """Get task arguments as Queenbee task arguments."""
+    """Get task input arguments in Python method as Queenbee task arguments."""
     task_args = []
     template = func.__task_template__
     func_args = inspect.getfullargspec(func)
-    # print(func_args)
-    # print('-----------\n')
+
     names = func_args.args[1:]  # first arg is self
     if not names:
         # no arguments
@@ -142,7 +140,7 @@ def _get_task_loop(value, inputs_info) -> DAGTaskLoop:
 
 
 def _get_task_returns(func) -> NamedTuple:
-    """Set task returns based on template outputs and returns."""
+    """Get task returns based on template outputs and returns."""
     template = func.__task_template__
     pattern = r'[\'\"]from[\'\"]\s*:\s*.*\._outputs\.(\S*)\s*[,}]'
     parent = func.__name__.replace('_', '-')
@@ -166,9 +164,29 @@ def _get_task_returns(func) -> NamedTuple:
     return outputs(*list(mapper.values()))
 
 
-def task(template, needs=None, loop=None, sub_folder=None, sub_paths: Dict = None,
-         annotations=None):
-    """A decorator for task methods in a DAG."""
+def task(template, needs=None, loop=None, sub_folder: str = None, sub_paths: Dict = None,
+         annotations: Dict = None):
+    """Task decorator for methods in a DAG.
+
+        @task(template=Template, ...)
+
+        Args:
+            template: A queenbee-dsl Function or DAG.
+            needs: A list of methods that this should be executed before this task.
+                This task will only be executed after these tasks are executed
+                successfully.
+            loop: An iterator to loop over. The task will be executed for each item
+                in this iterator.
+            sub_folder: An optional sub_folder for execution of this task. If sub_folder
+                is provided all the outputs from this task will be copied under the
+                sub_folder. Sub_folder is usually used with loops and named based on
+                the loop item to keep the results of each iteration in a separate folder.
+            sub_paths: A dictionary to provide sub_path for input arguments. Sub_path is
+                useful when a task only needs a file or a sub folder from the provided
+                argument.
+            annotations: An optional dictionary to annotate a task.
+
+    """
 
     sub_paths = sub_paths or {}
     sub_paths = {key.replace('-', '_'): value for key, value in sub_paths.items()}
