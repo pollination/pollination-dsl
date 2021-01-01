@@ -1,13 +1,18 @@
 # queenbee-python-dsl
-A Python DSL to create Queenbee Plugins as Python packages and Queenbee Recipes as Python Classes.
+A Python DSL to create Queenbee Plugins as Python packages and Queenbee Recipes as Python
+Classes.
+
+![image](https://user-images.githubusercontent.com/2915573/103444096-5a7b3880-4c33-11eb-98a3-09df1ab6c76e.png)
 
 # Installation
 1. Clone this repository.
 2. Change directory to root folder of the repository.
 3. `pip install .`
 
+# Quick Start
 
-# Example
+If you are interested to start writing your own plugins and recipe see the
+[introduction post](https://github.com/pollination/queenbee-python-dsl/wiki/Introduction).
 
 ## Function
 
@@ -50,8 +55,9 @@ class CreateOctreeWithSky(Function):
 
 ```
 
-The Queenbee class is accessible from `queenbee` property. Try `print(CreateOctreeWithSky().queenbee.yaml())` and
-you should see the Queenbee definition:
+The Queenbee class is accessible from `queenbee` property.
+Try `print(CreateOctreeWithSky().queenbee.yaml())` and you should see the full Queenbee
+definition:
 
 ```yaml
 type: Function
