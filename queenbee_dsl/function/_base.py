@@ -2,25 +2,33 @@ from dataclasses import dataclass
 from typing import NamedTuple
 import inspect
 from collections import namedtuple
-import importlib
 
 from queenbee.plugin.function import Function as QBFunction
+from queenbee.base.parser import parse_double_quotes_vars
 
-from ..common import camel_to_snake
+from ..common import camel_to_snake, _BaseClass
 
 
 @dataclass
-class Function:
-    """Baseclass for DSL Function classes."""
+class Function(_BaseClass):
+    """Baseclass for DSL Function classes.
+
+    Every Queenbee DAG must subclass from this class.
+
+    Attributes:
+        queenbee
+        _dependencies
+        _inputs
+        _outputs
+        _package
+        _python_package
+
+    """
     __decorator__ = 'function'
-    _cached_queenbee = None
-    _cached_outputs = None
-    _cached_package = None
-    _cached_inputs = None
 
     @property
     def queenbee(self) -> QBFunction:
-        """Convert this class to a Queenbee class."""
+        """Convert this class to a Queenbee Function."""
         # cache the Function since it always stays the same for each instance
         if self._cached_queenbee:
             return self._cached_queenbee
@@ -56,31 +64,6 @@ class Function:
         return self._cached_queenbee
 
     @property
-    def _inputs(self) -> NamedTuple:
-        """Return function inputs as a simple object with dot notation.
-
-        Use this property to access the inputs when creating a DAG.
-
-        The name starts with a _ not to conflict with a possible member of the class
-        with the name inputs.
-        """
-        if self._cached_inputs:
-            return self._cached_inputs
-        cls_name = camel_to_snake(self.__class__.__name__)
-        mapper = {
-            inp.name.replace('-', '_'): {
-                'name': inp.name.replace('-', '_'),
-                'parent': cls_name,
-                'value': inp
-            } for inp in self.queenbee.inputs
-        }
-
-        inputs = namedtuple('Inputs', list(mapper.keys()))
-        self._cached_inputs = inputs(*list(mapper.values()))
-
-        return self._cached_inputs
-
-    @property
     def _outputs(self) -> NamedTuple:
         """Return function outputs as a simple object with dot notation.
 
@@ -103,27 +86,24 @@ class Function:
 
         return self._cached_outputs
 
-    @property
-    def _package(self) -> dict:
-        """Queenbee package information.
 
-        This information will only be available if the function is part of a Python
-        package.
-        """
-        if self._cached_package:
-            return self._cached_package
+def command(func):
+    """Command decorator for a task.
 
-        module = importlib.import_module(self._python_package)
-        assert hasattr(module, '__queenbee__'), \
-            'Failed to find __queenbee__ info in __init__.py'
-        self._cached_package = getattr(module, '__queenbee__')
-        return self._cached_package
+    A method that is decorated by a command must return a string. Use ``{{}}`` to
+    template the command with command arguments (e.g. {{self.name}}).
 
-    @property
-    def _python_package(self) -> str:
-        """Python package information for this function.
+    """
 
-        This information will only be available if the function is part of a Python
-        package.
-        """
-        return self.__module__.split('.')[0]
+    def _clean_command(command: str) -> str:
+        """A helper function to reformat python command to Queenbee function commands."""
+        refs = parse_double_quotes_vars(command)
+        for ref in refs:
+            command = command.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return command
+
+    func.__decorator__ = 'command'
+    func.parse_command = _clean_command
+    return func

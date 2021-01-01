@@ -66,6 +66,16 @@ class _OutputBase(BaseModel):
 
 
 class StringOutput(_OutputBase):
+    """ A DAG string output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
+
     source: Any  # this field will be translated to from_
     annotations: Dict = None
     description: str = None
@@ -81,10 +91,28 @@ class StringOutput(_OutputBase):
 
 
 class IntegerOutput(StringOutput):
+    """ A DAG integer output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
     ...
 
 
 class NumberOutput(StringOutput):
+    """ A DAG number output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
     ...
 
 
@@ -93,10 +121,28 @@ class BooleanOutput(StringOutput):
 
 
 class DictOutput(StringOutput):
+    """ A DAG dictionary output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
     ...
 
 
 class FolderOutput(StringOutput):
+    """ A DAG folder output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
 
     @property
     def is_artifact(self):
@@ -108,6 +154,15 @@ class FolderOutput(StringOutput):
 
 
 class FileOutput(FolderOutput):
+    """ A DAG file output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
 
     @property
     def reference_type(self):
@@ -115,12 +170,21 @@ class FileOutput(FolderOutput):
 
 
 class PathOutput(FolderOutput):
+    """ A DAG path output. A path can be a file or a folder.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
     ...
 
 
 @dataclass
 class Outputs:
-    """DAG outputs."""
+    """DAG outputs enumeration."""
     str = StringOutput
     int = IntegerOutput
     float = NumberOutput

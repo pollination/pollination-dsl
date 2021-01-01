@@ -55,6 +55,15 @@ class _InputBase(BaseModel):
 
 
 class StringInput(_InputBase):
+    """ A DAG string input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     annotations: Dict = None
     description: str = None
     default: str = None
@@ -62,23 +71,67 @@ class StringInput(_InputBase):
 
 
 class IntegerInput(StringInput):
+    """ A DAG integer input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: int = None
 
 
 class NumberInput(StringInput):
+    """ A DAG number input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: float = None
 
 
 class BooleanInput(StringInput):
+    """ A DAG boolean input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: bool = None
 
 
 class DictInput(StringInput):
+    """ A DAG dictionary input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     default: Dict = None
 
 
 class FolderInput(StringInput):
+    """ A DAG folder input.
 
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     @property
     def is_artifact(self):
         return True
@@ -89,6 +142,16 @@ class FolderInput(StringInput):
 
 
 class FileInput(FolderInput):
+    """ A DAG file input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        extensions: An optional list of valid extensions for input file.
+        spec: A JSONSchema specification to validate input values.
+
+    """
     extensions: List[str] = None
 
     @property
@@ -97,6 +160,16 @@ class FileInput(FolderInput):
 
 
 class PathInput(FileInput):
+    """ A DAG path input. A path can be a file or a folder.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        extensions: An optional list of valid extensions for input file.
+        spec: A JSONSchema specification to validate input values.
+
+    """
 
     @property
     def reference_type(self):
@@ -105,7 +178,7 @@ class PathInput(FileInput):
 
 @dataclass
 class Inputs:
-    """DAG inputs."""
+    """DAG inputs enumeration."""
     str = StringInput
     int = IntegerInput
     float = NumberInput
