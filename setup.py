@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="queenbee-dsl",
-    author="Ladybug Tools",
+    author="Pollination",
     author_email="info@ladybug.tools",
     description="A Python DSL for Queenbee workflow language.",
     packages=setuptools.find_packages(exclude=["tests"]),

@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'queenbee-dsl'
-copyright = '{}, Ladybug Tools'.format(str(now.year))
-author = 'Ladybug Tools'
+copyright = '{}, Pollination'.format(str(now.year))
+author = 'Pollination'
 
 # The full version, including alpha/beta/rc tags
 release = ''
@@ -166,7 +166,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'queenbee-dsl.tex', 'queenbee-dsl Documentation',
-     'Ladybug Tools', 'manual'),
+     'Pollination', 'manual'),
 ]
 
 
