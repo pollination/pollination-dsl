@@ -1,15 +1,18 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 from dataclasses import dataclass
 from queenbee.io.inputs.dag import (
-    DAGStringInput, DAGIntegerInput, DAGNumberInput,
-    DAGBooleanInput, DAGFolderInput, DAGFileInput,
-    DAGPathInput, DAGJSONObjectInput
+    DAGGenericInput, DAGStringInput, DAGIntegerInput, DAGNumberInput,
+    DAGBooleanInput, DAGFolderInput, DAGFileInput, DAGPathInput,
+    DAGJSONObjectInput, DAGArrayInput
 )
-from queenbee.base.basemodel import BaseModel
+from queenbee.base.basemodel import BaseModel, Field
+from queenbee.io.common import ItemType
+
 
 __all__ = ('Inputs', )
 
 _inputs_mapper = {
+    'GenericInput': DAGGenericInput,
     'StringInput': DAGStringInput,
     'IntegerInput': DAGIntegerInput,
     'NumberInput': DAGNumberInput,
@@ -17,7 +20,8 @@ _inputs_mapper = {
     'FolderInput': DAGFolderInput,
     'FileInput': DAGFileInput,
     'PathInput': DAGPathInput,
-    'DictInput': DAGJSONObjectInput
+    'DictInput': DAGJSONObjectInput,
+    'ListInput': DAGArrayInput
 }
 
 
@@ -43,6 +47,9 @@ class _InputBase(BaseModel):
         if hasattr(self, 'extensions'):
             data['extensions'] = self.extensions
 
+        if hasattr(self, 'items_type'):
+            data['items_type'] = self.items_type
+
         return func.parse_obj(data)
 
     @property
@@ -54,7 +61,23 @@ class _InputBase(BaseModel):
         return 'InputReference'
 
 
-class StringInput(_InputBase):
+class GenericInput(_InputBase):
+    """ A DAG generic input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        spec: A JSONSchema specification to validate input values.
+
+    """
+    annotations: Dict = None
+    description: str = None
+    default: Any = None
+    spec: Dict = None
+
+
+class StringInput(GenericInput):
     """ A DAG string input.
 
     Args:
@@ -122,6 +145,27 @@ class DictInput(StringInput):
     default: Dict = None
 
 
+class ListInput(StringInput):
+    """ A DAG list input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        items_type: 'Type of items in list. All the items in an array must be from '
+        'the same type.'
+        spec: A JSONSchema specification to validate input values.
+
+    """
+    default: List = None
+
+    items_type: ItemType = Field(
+        ItemType.String,
+        description='Type of items in an array. All the items in an array must be from '
+        'the same type.'
+    )
+
+
 class FolderInput(StringInput):
     """ A DAG folder input.
 
@@ -179,6 +223,7 @@ class PathInput(FileInput):
 @dataclass
 class Inputs:
     """DAG inputs enumeration."""
+    any = GenericInput
     str = StringInput
     int = IntegerInput
     float = NumberInput
@@ -187,3 +232,4 @@ class Inputs:
     folder = FolderInput
     path = PathInput
     dict = DictInput
+    list = ListInput

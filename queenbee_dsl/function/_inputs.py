@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from queenbee.io.inputs.function import (
     FunctionStringInput, FunctionIntegerInput, FunctionNumberInput,
     FunctionBooleanInput, FunctionFolderInput, FunctionFileInput,
-    FunctionPathInput, FunctionJSONObjectInput
+    FunctionPathInput, FunctionJSONObjectInput, FunctionArrayInput
 )
-from queenbee.base.basemodel import BaseModel
+from queenbee.base.basemodel import BaseModel, Field
+from queenbee.io.common import ItemType
 
 __all__ = ('Inputs', )
 
@@ -17,7 +18,8 @@ _inputs_mapper = {
     'FolderInput': FunctionFolderInput,
     'FileInput': FunctionFileInput,
     'PathInput': FunctionPathInput,
-    'DictInput': FunctionJSONObjectInput
+    'DictInput': FunctionJSONObjectInput,
+    'ListInput': FunctionArrayInput
 }
 
 
@@ -117,6 +119,27 @@ class DictInput(StringInput):
     default: Dict = None
 
 
+class ListInput(StringInput):
+    """ A Function list input.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        default: Default value.
+        items_type: 'Type of items in list. All the items in an array must be from '
+        'the same type.'
+        spec: A JSONSchema specification to validate input values.
+
+    """
+    default: List = None
+
+    items_type: ItemType = Field(
+        ItemType.String,
+        description='Type of items in an array. All the items in an array must be from '
+        'the same type.'
+    )
+
+
 class FolderInput(StringInput):
     """ A Function folder input.
 
@@ -172,3 +195,4 @@ class Inputs:
     folder = FolderInput
     path = PathInput
     dict = DictInput
+    list = ListInput
