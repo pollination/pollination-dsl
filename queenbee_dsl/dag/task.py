@@ -9,7 +9,7 @@ from queenbee.io.outputs.task import TaskReturn, TaskPathReturn
 from queenbee.io.inputs.task import TaskArguments, TaskArgument, TaskPathArgument
 from queenbee.base.parser import parse_double_quotes_vars
 
-from ._inputs import _InputBase as DAGInput
+from .inputs import _InputBase as DAGInput
 from ..common import camel_to_snake
 
 
