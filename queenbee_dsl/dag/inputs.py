@@ -5,8 +5,10 @@ from queenbee.io.inputs.dag import (
     DAGBooleanInput, DAGFolderInput, DAGFileInput, DAGPathInput,
     DAGJSONObjectInput, DAGArrayInput
 )
-from queenbee.base.basemodel import BaseModel, Field
+from queenbee.base.basemodel import BaseModel, Field, validator
 from queenbee.io.common import ItemType
+
+from ..alias.inputs import InputAliasTypes
 
 
 __all__ = ('Inputs', )
@@ -27,6 +29,16 @@ _inputs_mapper = {
 
 class _InputBase(BaseModel):
 
+    annotations: Dict = None
+    description: str = None
+    default: Any = None
+    spec: Dict = None
+    alias: List[InputAliasTypes] = None
+
+    @validator('alias', always=True)
+    def empty_list_alias(cls, v):
+        return v if v is not None else []
+
     @property
     def __decorator__(self) -> str:
         """Queenbee decorator for inputs."""
@@ -41,7 +53,8 @@ class _InputBase(BaseModel):
             'default': self.default,
             'description': self.description,
             'annotations': self.annotations,
-            'spec': self.spec
+            'spec': self.spec,
+            'alias': [al.to_queenbee().dict() for al in self.alias]
         }
 
         if hasattr(self, 'extensions'):
@@ -69,12 +82,10 @@ class GenericInput(_InputBase):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
-    annotations: Dict = None
-    description: str = None
-    default: Any = None
-    spec: Dict = None
+    ...
 
 
 class StringInput(GenericInput):
@@ -85,12 +96,10 @@ class StringInput(GenericInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
-    annotations: Dict = None
-    description: str = None
     default: str = None
-    spec: Dict = None
 
 
 class IntegerInput(StringInput):
@@ -101,6 +110,7 @@ class IntegerInput(StringInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     default: int = None
@@ -114,6 +124,7 @@ class NumberInput(StringInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     default: float = None
@@ -127,6 +138,7 @@ class BooleanInput(StringInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     default: bool = None
@@ -140,6 +152,7 @@ class DictInput(StringInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     default: Dict = None
@@ -155,6 +168,7 @@ class ListInput(StringInput):
         items_type: 'Type of items in list. All the items in an array must be from '
         'the same type.'
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     default: List = None
@@ -174,6 +188,7 @@ class FolderInput(StringInput):
         description: Input description.
         default: Default value.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     @property
@@ -194,6 +209,7 @@ class FileInput(FolderInput):
         default: Default value.
         extensions: An optional list of valid extensions for input file.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
     extensions: List[str] = None
@@ -212,6 +228,7 @@ class PathInput(FileInput):
         default: Default value.
         extensions: An optional list of valid extensions for input file.
         spec: A JSONSchema specification to validate input values.
+        alias: A list of aliases for this input in different platforms.
 
     """
 

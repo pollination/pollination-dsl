@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from queenbee_dsl.alias.outputs import OutputAliasTypes
+from typing import Any, Dict, List
 from dataclasses import dataclass
 
 from queenbee.io.outputs.dag import (
@@ -45,6 +46,24 @@ def _get_from(value, reference):
 
 class _OutputBase(BaseModel):
 
+    source: Any  # this field will be translated to from_
+    annotations: Dict = None
+    description: str = None
+    alias: List[OutputAliasTypes] = None
+
+    @validator('source')
+    def change_self_to_inputs(cls, v):
+        refs = parse_double_quotes_vars(v)
+        for ref in refs:
+            v = v.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return v
+
+    @validator('alias', always=True)
+    def empty_list_alias(cls, v):
+        return v if v is not None else []
+
     @property
     def __decorator__(self) -> str:
         """Queenbee decorator for outputs."""
@@ -57,7 +76,8 @@ class _OutputBase(BaseModel):
             'name': name.replace('_', '-'),
             'from': _get_from(self.source, self.reference_type),
             'description': self.description,
-            'annotations': self.annotations
+            'annotations': self.annotations,
+            'alias': [al.to_queenbee().dict() for al in self.alias]
         }
 
         if hasattr(self, 'items_type'):
@@ -82,24 +102,13 @@ class GenericOutput(_OutputBase):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
-
-    source: Any  # this field will be translated to from_
-    annotations: Dict = None
-    description: str = None
-
-    @validator('source')
-    def change_self_to_inputs(cls, v):
-        refs = parse_double_quotes_vars(v)
-        for ref in refs:
-            v = v.replace(
-                ref, ref.replace('self.', 'inputs.').replace('_', '-')
-            )
-        return v
+    ...
 
 
-class StringOutput(_OutputBase):
+class StringOutput(GenericOutput):
     """ A DAG string output.
 
     Args:
@@ -107,6 +116,7 @@ class StringOutput(_OutputBase):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
 
@@ -132,6 +142,7 @@ class IntegerOutput(StringOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
     ...
@@ -145,6 +156,7 @@ class NumberOutput(StringOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
     ...
@@ -162,6 +174,7 @@ class DictOutput(StringOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
     ...
@@ -175,6 +188,7 @@ class ListOutput(StringOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
     items_type: ItemType = Field(
@@ -192,6 +206,7 @@ class FolderOutput(StringOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
 
@@ -212,6 +227,7 @@ class FileOutput(FolderOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
 
@@ -228,6 +244,7 @@ class PathOutput(FolderOutput):
         description: Input description.
         source: Source for this output. A source is usually from one of the template
             outputs but it can also be declared as a relative path.
+        alias: A list of aliases for this output in different platforms.
 
     """
     ...
