@@ -1,18 +1,22 @@
 from typing import Any, Dict
 from dataclasses import dataclass
+
 from queenbee.io.outputs.dag import (
-    DAGStringOutput, DAGIntegerOutput, DAGNumberOutput,
-    DAGBooleanOutput, DAGFolderOutput, DAGFileOutput,
-    DAGPathOutput, DAGJSONObjectOutput
+    DAGGenericOutput, DAGStringOutput, DAGIntegerOutput, DAGNumberOutput,
+    DAGBooleanOutput, DAGFolderOutput, DAGFileOutput, DAGPathOutput,
+    DAGJSONObjectOutput, DAGArrayOutput
 )
 from queenbee.base.basemodel import BaseModel
+from queenbee.io.common import ItemType
 from queenbee.base.parser import parse_double_quotes_vars
-from pydantic import validator
+
+from pydantic import validator, Field
 
 
 __all__ = ('Outputs', )
 
 _outputs_mapper = {
+    'GenericOutput': DAGGenericOutput,
     'StringOutput': DAGStringOutput,
     'IntegerOutput': DAGIntegerOutput,
     'NumberOutput': DAGNumberOutput,
@@ -20,7 +24,8 @@ _outputs_mapper = {
     'FolderOutput': DAGFolderOutput,
     'FileOutput': DAGFileOutput,
     'PathOutput': DAGPathOutput,
-    'DictOutput': DAGJSONObjectOutput
+    'DictOutput': DAGJSONObjectOutput,
+    'ListOutput': DAGArrayOutput
 }
 
 
@@ -54,6 +59,10 @@ class _OutputBase(BaseModel):
             'description': self.description,
             'annotations': self.annotations
         }
+
+        if hasattr(self, 'items_type'):
+            data['items_type'] = self.items_type
+
         return func.parse_obj(data)
 
     @property
@@ -63,6 +72,31 @@ class _OutputBase(BaseModel):
     @property
     def reference_type(self):
         return 'TaskReference'
+
+
+class GenericOutput(_OutputBase):
+    """ A DAG generic output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
+
+    source: Any  # this field will be translated to from_
+    annotations: Dict = None
+    description: str = None
+
+    @validator('source')
+    def change_self_to_inputs(cls, v):
+        refs = parse_double_quotes_vars(v)
+        for ref in refs:
+            v = v.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return v
 
 
 class StringOutput(_OutputBase):
@@ -133,6 +167,23 @@ class DictOutput(StringOutput):
     ...
 
 
+class ListOutput(StringOutput):
+    """ A DAG list output.
+
+    Args:
+        annotations: An optional annotation dictionary.
+        description: Input description.
+        source: Source for this output. A source is usually from one of the template
+            outputs but it can also be declared as a relative path.
+
+    """
+    items_type: ItemType = Field(
+        ItemType.String,
+        description='Type of items in this array. All the items in an array must be '
+        'from the same type.'
+    )
+
+
 class FolderOutput(StringOutput):
     """ A DAG folder output.
 
@@ -185,6 +236,7 @@ class PathOutput(FolderOutput):
 @dataclass
 class Outputs:
     """DAG outputs enumeration."""
+    any = GenericOutput
     str = StringOutput
     int = IntegerOutput
     float = NumberOutput
@@ -193,3 +245,4 @@ class Outputs:
     folder = FolderOutput
     path = PathOutput
     dict = DictOutput
+    list = ListOutput
