@@ -4,6 +4,9 @@ Classes.
 
 ![image](https://user-images.githubusercontent.com/2915573/103444096-5a7b3880-4c33-11eb-98a3-09df1ab6c76e.png)
 
+# API docs
+[Queenbee-DSL API docs](https://pollination.github.io/queenbee-python-dsl/docs/queenbee_dsl.html#subpackages)
+
 # Installation
 1. Clone this repository.
 2. Change directory to root folder of the repository.
