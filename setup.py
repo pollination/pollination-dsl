@@ -12,6 +12,10 @@ setuptools.setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requirements,
+    entry_points='''
+        [queenbee.plugins]
+        dsl=queenbee_dsl.cli:dsl
+    ''',
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
