@@ -225,13 +225,13 @@ def package(package_name: str, readme: str = None) -> None:
     repo_index.to_json(index_path.as_posix(), indent=2)
 
 
-def write(
+def translate(
         package_name: str,
         target_folder: str,
         baked: bool = False,
         readme: str = None
         ) -> str:
-    """Write Queenbee plugin or recipe from Python package to a folder.
+    """Translate Python package to a Queenbee plugin or recipe.
 
     BakedRecipes are written to a single file.
 
