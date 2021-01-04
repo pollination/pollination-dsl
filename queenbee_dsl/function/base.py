@@ -1,6 +1,8 @@
-from dataclasses import dataclass
-from typing import NamedTuple
 import inspect
+import subprocess
+
+from dataclasses import dataclass
+from typing import Any, Dict, NamedTuple
 from collections import namedtuple
 
 from queenbee.plugin.function import Function as QBFunction
@@ -85,6 +87,32 @@ class Function(_BaseClass):
         self._cached_outputs = outputs(*list(mapper.values()))
 
         return self._cached_outputs
+
+    def run(self, inputs: Dict[str, Any], run_folder: str = None) -> str:
+        """Run a function locally for testing.
+
+        This method does not return the output values.
+
+        Args:
+            inputs: A dictionary that maps input names to values
+                (e.g. {'input_one': 5, ...}).
+            run_folder: An optional folder to run the function. A temporary folder
+                will be created if this folder is not provided.
+
+        Returns:
+            str -- path to run_folder.
+        """
+        func = self.queenbee
+        command = ' '.join(func.command.split())
+        inputs = func.inputs
+        print(command)
+        print(inputs)
+        # check all the inputs are provided
+
+        # copy artifacts to run_folder
+        ## use queenbee-local commands
+        # execute the command
+        # subprocess.call()
 
 
 def command(func):
