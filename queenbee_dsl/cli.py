@@ -38,7 +38,7 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
 
     \b
     Args:\b
-        recipe: Path to a queenbee baked recipe file or a recipe folder.\b
+        recipe-name: Recipe name. Recipe must be installed as a Python package.\b
         target-folder: Path to target folder to translate the recipe.\b
 
     """
@@ -54,7 +54,10 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
         try:
             from queenbee_luigi.recipe import Recipe
         except ImportError:
-            raise ClickException('Failed to find queenbee-luigi')
+            raise ClickException(
+                'Failed to find queenbee-luigi. To translate a recipe to luigi pipeline '
+                'you must have queenbee-luigi installed.'
+            )
 
         recipe = load(recipe_name, baked=True)
         try:
