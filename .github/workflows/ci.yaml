@@ -54,6 +54,8 @@ jobs:
           npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYPI_USERNAME: ${{ secrets.POLLINATION_PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.POLLINATION_PYPI_PASSWORD }}
 
   docs:
     name: Generate docs
