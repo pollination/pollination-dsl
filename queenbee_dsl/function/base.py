@@ -127,7 +127,7 @@ class Function(_BaseClass):
             assert ref.startswith('inputs.'), \
                 'All referenced values must start with {{inputs followed with' \
                 f' variable name. Invalid referenced value: {ref}'
-            var = ref.replace('inputs.', '')
+            var = ref.replace('inputs.', '').replace('-', '_')
             command = command.replace('{%s}' % ref, str(inputs[var]))
 
         for art in func.artifact_inputs:
