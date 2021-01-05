@@ -1,2 +1,2 @@
-queenbee>=1.22.8
+queenbee==1.22.8
 click-plugins==1.1.1
