@@ -1,6 +1,6 @@
 # queenbee-python-dsl
-A Python DSL to create Queenbee Plugins as Python packages and Queenbee Recipes as Python
-Classes.
+A Python Domain Specific Language (DSL) to create Queenbee Plugins and Recipes as Python
+objects.
 
 ![image](https://user-images.githubusercontent.com/2915573/103444096-5a7b3880-4c33-11eb-98a3-09df1ab6c76e.png)
 
@@ -142,17 +142,17 @@ can use `queenbee-dsl` to load the package or write it to a folder.
 from queenbee_dsl.package import load, write
 
 # name of the queenbee package
-python_package = 'honeybee_radiance_pollination'
+python_package = 'pollination_honeybee_radiance'
 
 # load this package as Queenbee Plugin
 plugin = load(python_package)
 
 # or write the package as a Queenbee plugin to a folder directly
-write(python_package, './honeybee-radiance-pollination')
+write(python_package, './pollination-honeybee-radiance')
 
 ```
 
-See [`honeybee-radiance-pollination` plugin](https://github.com/pollination/honeybee-radiance-pollination) for a full project example.
+See [`pollination-honeybee-radiance` plugin](https://github.com/pollination/pollination-honeybee-radiance) for a full project example.
 
 ## Recipe
 
@@ -176,4 +176,4 @@ write(python_package, './daylight-factor')
 
 ```
 
-See [`daylight factor` recipe](https://github.com/pollination/honeybee-radiance-recipes/tree/master/recipes/daylight-factor) for a full project example.
+See [`daylight factor` recipe](https://github.com/pollination/ladybug-tools-recipes/tree/master/recipes/daylight-factor) for a full project example.
