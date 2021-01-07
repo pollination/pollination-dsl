@@ -7,6 +7,9 @@ objects.
 # API docs
 [Queenbee-DSL API docs](https://pollination.github.io/queenbee-python-dsl/docs/queenbee_dsl.html#subpackages)
 
+# Requirements
+Python >=3.7
+
 # Installation
 1. Clone this repository.
 2. Change directory to root folder of the repository.
@@ -163,7 +166,7 @@ as templates for each task.
 Packaging a plugin is exactly the same as packaging a plugin.
 
 ```python
-from queenbee_dsl.package import load, write
+from queenbee_dsl.package import load, translate
 
 # name of the queenbee package
 python_package = 'daylight-factor'
@@ -171,8 +174,8 @@ python_package = 'daylight-factor'
 # load this package as Queenbee Recipe
 recipe = load(python_package, baked=True)
 
-# or write the package as a Queenbee plugin to a folder directly
-write(python_package, './daylight-factor')
+# or translate and write the package as a Queenbee plugin to a folder directly
+translate(python_package, './daylight-factor')
 
 ```
 
