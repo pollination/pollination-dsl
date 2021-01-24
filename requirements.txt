@@ -1,3 +1,3 @@
-queenbee==1.22.10
+queenbee==1.22.11
 queenbee-local==0.3.2
 click-plugins==1.1.1
