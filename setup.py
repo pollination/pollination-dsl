@@ -6,6 +6,9 @@ with open('requirements.txt') as f:
 with open('README.md') as fh:
     long_description = fh.read()
 
+with open('pollination-requirements.txt') as f:
+    pollination_requirements = f.read().splitlines()
+
 setuptools.setup(
     name="queenbee-dsl",
     use_scm_version=True,
@@ -20,6 +23,7 @@ setuptools.setup(
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requirements,
+    extras_require={'pollination': pollination_requirements},
     entry_points='''
         [queenbee.plugins]
         dsl=queenbee_dsl.cli:dsl
