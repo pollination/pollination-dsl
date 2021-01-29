@@ -81,7 +81,7 @@ def _get_package_readme(package_name: str) -> str:
     package_data = dict(message_from_string(info))
     lines = package_data.get('Description').split('\n')
     lines = [line[8:] if line[:8] == '        ' else line for line in lines]
-    return '\n'.join(lines)
+    return ''.join(lines)
 
 
 def _get_package_license(package_data: Dict) -> Dict:
