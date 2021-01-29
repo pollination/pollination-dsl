@@ -13,7 +13,7 @@ from queenbee.plugin.plugin import Plugin
 import yaml
 
 
-from queenbee_dsl.package import translate, load
+from queenbee_dsl.package import translate, load, _get_package_readme
 
 
 @click.group(help='interact with queenbee python DSL packages.')
@@ -148,7 +148,10 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public):
     # write to a folder
     temp_dir = tempfile.mkdtemp()
     folder = pathlib.Path(temp_dir, py_module.__queenbee__['name'])
-    resource.to_folder(folder_path=folder)
+    resource.to_folder(
+        folder_path=folder,
+        readme_string=_get_package_readme(resource_name)
+    )
     # overwite resources in dependencies
     if resource_type == 'recipe' and source is not None:
         # update the value for source in dependencies.yaml file
