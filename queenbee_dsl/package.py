@@ -1,10 +1,12 @@
 import importlib
 import pkgutil
 import pathlib
+from pkg_resources import get_distribution
+from email import message_from_string
 
 from setuptools.command.develop import develop
 from setuptools.command.install import install
-from typing import Union
+from typing import Dict, List, Union
 
 from queenbee.plugin.plugin import Plugin, PluginConfig, MetaData
 from queenbee.recipe.recipe import Recipe, BakedRecipe, Dependency, DependencyKind
@@ -51,7 +53,8 @@ class PackageQBInstall(install):
     def run(self):
         install.run(self)
         # add queenbee package to queenbee-dsl repository
-        package(self.__queenbee_name__)
+        package_name = self.config_vars['dist_name']
+        package(package_name)
 
 
 class PackageQBDevelop(develop):
@@ -65,8 +68,113 @@ class PackageQBDevelop(develop):
 
     def run(self):
         develop.run(self)
-        # add queenbee package to queenbee-dsl repository
-        package(self.__queenbee_name__)
+        package_name = self.config_vars['dist_name']
+        package(package_name)
+
+
+def _get_package_readme(package_name: str) -> str:
+    try:
+        info = get_distribution(package_name).get_metadata('PKG-INFO')
+    except FileNotFoundError:
+        info = get_distribution(package_name).get_metadata('METADATA')
+
+    package_data = dict(message_from_string(info))
+    lines = package_data.get('Description').split('\n')
+    lines = [line[8:] if line[:8] == '        ' else line for line in lines]
+    return '\n'.join(lines)
+
+
+def _get_package_license(package_data: Dict) -> Dict:
+    # try to get license
+    license_info = package_data.get('License')
+    if not license_info:
+        license, link = None, None
+    elif license_info and ',' in license_info:
+        license, link = [info.strip() for info in license_info.split(',')]
+    else:
+        license, link = license_info.strip(), None
+
+    return {'name': license, 'url': link}
+
+
+def _get_package_keywords(package_data: Dict) -> List:
+    keywords = package_data.get('Keyword')
+    if keywords:
+        keywords = [key.strip() for key in keywords.split(',')]
+    return keywords
+
+
+def _get_package_maintainers(package_data: Dict) -> List[Dict]:
+    info = []
+    maintainer = package_data.get('Maintainer')
+    maintainer_email = package_data.get('Maintainer-email')
+    author = package_data.get('Author')
+    author_email = package_data.get('Author-email')
+
+    if author:
+        authors = [m.strip() for m in author.split(',')]
+        if author_email:
+            emails = [m.strip() for m in author_email.split(',')]
+            for name, email in zip(authors, emails):
+                info.append({'name': name, 'email': email})
+        else:
+            for name in authors:
+                info.append({'name': name, 'email': None})
+
+    if maintainer:
+        maintainers = [m.strip() for m in maintainer.split(',')]
+        if maintainer_email:
+            emails = [m.strip() for m in maintainer_email.split(',')]
+            for name, email in zip(maintainers, emails):
+                info.append({'name': name, 'email': email})
+        else:
+            for name in maintainers:
+                info.append({'name': name, 'email': None})
+    return info
+
+
+def _get_package_data(package_name: str) -> Dict:
+    try:
+        info = get_distribution(package_name).get_metadata('PKG-INFO')
+    except FileNotFoundError:
+        info = get_distribution(package_name).get_metadata('METADATA')
+
+    package_data = dict(message_from_string(info))
+
+    data = {
+        'name': package_data.get('Name'),
+        'description': package_data.get('Summary'),
+        'home': package_data.get('Home-page'),
+        'tag': package_data.get('Version'),
+        'keywords': _get_package_keywords(package_data),
+        'maintainers': _get_package_maintainers(package_data),
+        'license': _get_package_license(package_data)
+    }
+
+    return data
+
+
+def _get_meta_data(module, package_type: str) -> MetaData:
+    qb_info = module.__queenbee__
+    package_data = _get_package_data(module.__name__)
+
+    if package_type == 'plugin':
+        qb_info.pop('config')
+    else:
+        # recipe
+        qb_info.pop('entry_point')
+
+    for k, v in package_data.items():
+        if v is None:
+            continue
+        if k == 'name' and k in qb_info:
+            # only use package name if name is not provided
+            continue
+        qb_info[k] = v
+
+    metadata = MetaData.parse_obj(qb_info)
+
+    return metadata
 
 
 def _load_plugin(module) -> Plugin:
@@ -85,14 +193,12 @@ def _load_plugin(module) -> Plugin:
     package_name = module.__name__
     # get metadata
     config = PluginConfig.parse_obj(qb_info['config'])
-    meta_data = dict(qb_info)
-    meta_data.pop('config')
-    metadata = MetaData.parse_obj(meta_data)
+    metadata = _get_meta_data(module, 'plugin')
 
     folder = pathlib.Path(module.__file__).parent
 
     functions = []
-    for (module_loader, name, _) in pkgutil.iter_modules([folder]):
+    for (_, name, _) in pkgutil.iter_modules([folder]):
         module = importlib.import_module('.' + name, package_name)
         for attr in dir(module):
             loaded_attr = getattr(module, attr)
@@ -106,7 +212,7 @@ def _load_plugin(module) -> Plugin:
     return plugin
 
 
-def _load_recipe(module, baked: bool = False)-> Union[BakedRecipe, Recipe]:
+def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     # load entry-point DAG
     """Load Queenbee plugin from Python package.
 
@@ -127,8 +233,7 @@ def _load_recipe(module, baked: bool = False)-> Union[BakedRecipe, Recipe]:
 
     # get metadata
     metadata = dict(qb_info)
-    metadata.pop('entry_point')
-    metadata = MetaData.parse_obj(metadata)
+    metadata = _get_meta_data(module, 'recipe')
 
     _dependencies = main_dag._dependencies
     # create a queenbee Recipe object
@@ -211,7 +316,7 @@ def package(package_name: str, readme: str = None) -> None:
     # add to queenbee-dsl repository
     try:
         plugin_version, file_object = PackageVersion.package_resource(
-            qb_obj, readme=readme
+            qb_obj, readme=_get_package_readme(package_name)
         )
     except Exception as error:
         raise ValueError(f'Failed to package {package_name} {qb_type}\n {error}')
@@ -252,5 +357,8 @@ def translate(
         recipe_file.write_text(qb_object.yaml())
         return recipe_file.as_posix()
     else:
-        qb_object.to_folder(folder_path=target_folder, readme_string=readme)
+        qb_object.to_folder(
+            folder_path=target_folder,
+            readme_string=_get_package_readme(package_name)
+        )
         return target_folder

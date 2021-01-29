@@ -180,3 +180,75 @@ translate(python_package, './daylight-factor')
 ```
 
 See [`daylight factor` recipe](https://github.com/pollination/ladybug-tools-recipes/tree/master/recipes/daylight-factor) for a full project example.
+
+
+# How to create a queenbee-dsl package
+
+Queenbee-dsl uses Python's standard packaging to package queenbee plugins and recipes.
+It parses most of the data from inputs in `setup.py` file and some Queenbee specific
+information from `__init__.py` file. Below is an example of how these file should look
+like.
+
+## setup.py
+
+```python
+
+#!/usr/bin/env python
+import setuptools
+
+# These two class extends setup.py to install the packages as queenbee packages
+from queenbee_dsl.package import PackageQBInstall, PackageQBDevelop
+
+# Read me will be mapped to readme strings
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+setuptools.setup(
+    cmdclass={'develop': PackageQBDevelop, 'install': PackageQBInstall},    # required - include this for queenbee packaging
+    name='pollination-honeybee-radiance',                                   # required - will be used for package name unless it is overwritten using __queenbee__ key in __init__.py
+    version='0.1.0',                                                        # required - will be used as package tag. you can also use semantic versioning
+    url='https://github.com/pollination/pollination-honeybee-radiance',     # optional - will be translated to home
+    description='Honeybee Radiance plugin for Pollination.',                # optional - will be used as package description
+    long_description=long_description,                                      # optional - will be translated to ReadMe content on Pollination
+    long_description_content_type="text/markdown",
+    author='author_1',                                                      # optional - all the information for author and maintainers will be
+    author_email='author_1@example.com',                                    # translated to maintainers. For multiple authors use comma
+    maintainer='maintainer_1, maintainer_2',                                # inside the string.
+    maintainer_email='maintainer_1@example.come, maintainer_2@example.com',
+    packages=setuptools.find_packages('pollination_honeybee_radiance'),     # required - standard python packaging input. not used by queenbee
+    keywords='honeybee, radiance, ladybug-tools, daylight',                 # optional - will be used as keywords
+    license='PolyForm Shield License 1.0.0, https://polyformproject.org/wp-content/uploads/2020/06/PolyForm-Shield-1.0.0.txt'  # optional - the license link should be separated by a comma
+)
+
+```
+
+## __init__.py
+
+Here is an example `__init__.py` for a plugin.
+
+```python
+
+__queenbee__ = {
+    'name': 'honeybee-radiance',  # optional - new name for queenbee package. this will overwrite the Python package name
+    'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
+    'config': {                   # required for Pollination - docker information for this specific plugin
+        'docker': {
+            'image': 'ladybugtools/honeybee-radiance:1.28.12',
+            'workdir': '/home/ladybugbot/run'
+        }
+    }
+}
+```
+
+Here is an example `__init__.py` for a recipe.
+
+```python
+from .entry import AnnualDaylightEntryPoint
+
+__queenbee__ = {
+    'name': 'annual-daylight',                # optional - new name for queenbee package. this will overwrite the Python package name
+    'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
+    'entry_point': AnnualDaylightEntryPoint,  # required - this will point queenbee to the class that should be used to start the run
+}
+
+```
