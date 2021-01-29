@@ -23,7 +23,7 @@ _outputs_mapper = {
     'FileOutput': FunctionFileOutput,
     'PathOutput': FunctionPathOutput,
     'DictOutput': FunctionJSONObjectOutput,
-    'ArrayOutput': FunctionArrayOutput
+    'ListOutput': FunctionArrayOutput
 }
 
 
