@@ -1,6 +1,7 @@
 import importlib
 import pkgutil
 import pathlib
+import importlib_metadata
 from pkg_resources import get_distribution
 from email import message_from_string
 
@@ -73,15 +74,9 @@ class PackageQBDevelop(develop):
 
 
 def _get_package_readme(package_name: str) -> str:
-    try:
-        info = get_distribution(package_name).get_metadata('PKG-INFO')
-    except FileNotFoundError:
-        info = get_distribution(package_name).get_metadata('METADATA')
-
-    package_data = dict(message_from_string(info))
-    lines = package_data.get('Description').split('\n')
-    lines = [line[8:] if line[:8] == '        ' else line for line in lines]
-    return ''.join(lines)
+    package_data = importlib_metadata.metadata(package_name)
+    long_description = package_data.get_payload()
+    return long_description
 
 
 def _get_package_license(package_data: Dict) -> Dict:
@@ -134,12 +129,8 @@ def _get_package_maintainers(package_data: Dict) -> List[Dict]:
 
 
 def _get_package_data(package_name: str) -> Dict:
-    try:
-        info = get_distribution(package_name).get_metadata('PKG-INFO')
-    except FileNotFoundError:
-        info = get_distribution(package_name).get_metadata('METADATA')
 
-    package_data = dict(message_from_string(info))
+    package_data = importlib_metadata.metadata('pollination.honeybee_radiance')
 
     data = {
         'name': package_data.get('Name'),
@@ -275,14 +266,26 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
         baked: A boolean value to indicate wether to return a Recipe or a BakedRecipe.
     """
     package_name = package_name.replace('-', '_')
+    err_msg = \
+        f'No module named \'{package_name}\'. Did you forget to install the module?\n' \
+        'You can use `pip install` command to install the package from a local ' \
+        'repository or from PyPI.'
     try:
         module = importlib.import_module(package_name)
     except ModuleNotFoundError:
-        raise ValueError(
-            f'No module named \'{package_name}\'. Did you forget to install the module?'
-            '\nYou can use `pip install` command to install the package from a local '
-            'repository or from PyPI.'
-        )
+        # for pollination modules split and try again pollination-honeybee-radiance
+        # is namedspaced as pollination.honeybee_radiance
+        package_name_segments = package_name.split('_')
+        if len(package_name_segments) == 1:
+            raise ModuleNotFoundError(err_msg)
+        _namespace = package_name_segments[0]
+        _name = '_'.join(package_name_segments[1:])
+        try:
+            namespace = __import__(f'{_namespace}.{_name}')
+            module = getattr(namespace, _name)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(err_msg)
+
     assert hasattr(module, '__queenbee__'), \
         'Failed to find __queenbee__ info in __init__.py'
     qb_info = getattr(module, '__queenbee__')
