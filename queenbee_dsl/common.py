@@ -10,6 +10,34 @@ def camel_to_snake(name: str) -> str:
         ''.join(['-' + x.lower() if x.isupper() else x for x in name][1:])
 
 
+def import_module(name: str):
+    """Import a module by name.
+
+    This function works for both namespace and non-name space Python modules.
+    """
+    package_name = name.replace('-', '_')
+    err_msg = \
+        f'No module named \'{package_name}\'. Did you forget to install the module?\n' \
+        'You can use `pip install` command to install the package from a local ' \
+        'repository or from PyPI.'
+    try:
+        module = importlib.import_module(package_name)
+    except ModuleNotFoundError:
+        # for pollination modules split and try again pollination-honeybee-radiance
+        # is namedspaced as pollination.honeybee_radiance
+        package_name_segments = package_name.split('_')
+        if len(package_name_segments) == 1:
+            raise ModuleNotFoundError(err_msg)
+        _namespace = package_name_segments[0]
+        _name = '_'.join(package_name_segments[1:])
+        try:
+            namespace = __import__(f'{_namespace}.{_name}')
+            module = getattr(namespace, _name)
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(err_msg)
+
+    return module
+
 @dataclass
 class _BaseClass:
     """Base class for Queenbee DSL Function and DAG.

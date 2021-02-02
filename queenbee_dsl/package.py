@@ -2,8 +2,6 @@ import importlib
 import pkgutil
 import pathlib
 import importlib_metadata
-from pkg_resources import get_distribution
-from email import message_from_string
 
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -16,6 +14,7 @@ from queenbee.repository.index import RepositoryIndex
 from queenbee.config import Config, RepositoryReference
 
 from .function import Function
+from .common import import_module
 
 
 def _init_repo() -> pathlib.Path:
@@ -130,7 +129,7 @@ def _get_package_maintainers(package_data: Dict) -> List[Dict]:
 
 def _get_package_data(package_name: str) -> Dict:
 
-    package_data = importlib_metadata.metadata('pollination.honeybee_radiance')
+    package_data = importlib_metadata.metadata(package_name)
 
     data = {
         'name': package_data.get('Name'),
@@ -223,7 +222,6 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     assert main_dag, f'{package_name} __queenbee__ info is missing the enetry_point key.'
 
     # get metadata
-    metadata = dict(qb_info)
     metadata = _get_meta_data(module, 'recipe')
 
     _dependencies = main_dag._dependencies
@@ -265,26 +263,7 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
         package_name: Python package name (e.g. honeybee-radiance-pollination)
         baked: A boolean value to indicate wether to return a Recipe or a BakedRecipe.
     """
-    package_name = package_name.replace('-', '_')
-    err_msg = \
-        f'No module named \'{package_name}\'. Did you forget to install the module?\n' \
-        'You can use `pip install` command to install the package from a local ' \
-        'repository or from PyPI.'
-    try:
-        module = importlib.import_module(package_name)
-    except ModuleNotFoundError:
-        # for pollination modules split and try again pollination-honeybee-radiance
-        # is namedspaced as pollination.honeybee_radiance
-        package_name_segments = package_name.split('_')
-        if len(package_name_segments) == 1:
-            raise ModuleNotFoundError(err_msg)
-        _namespace = package_name_segments[0]
-        _name = '_'.join(package_name_segments[1:])
-        try:
-            namespace = __import__(f'{_namespace}.{_name}')
-            module = getattr(namespace, _name)
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(err_msg)
+    module = import_module(package_name)
 
     assert hasattr(module, '__queenbee__'), \
         'Failed to find __queenbee__ info in __init__.py'

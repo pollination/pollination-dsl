@@ -7,8 +7,9 @@ import tempfile
 
 import click
 from click.exceptions import ClickException
+from importlib_metadata import metadata
 
-from queenbee.config import Config as QBConfig
+from queenbee.cli.context import Context as QueenbeeContext
 from queenbee.plugin.plugin import Plugin
 import yaml
 
@@ -94,16 +95,21 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
 # TODO: Add better support for mapping dependencies to sources. For now it is all
 # set to the same value which is fine for our use cases.
 @click.option(
-    '-src', '--source', help='A link to source the dependencies. This value will '
-    'overwrite the source value in recipe\'s dependencies files.'
+    '-src', '--source', help='A link to replace the source for dependencies. This value '
+    'will overwrite the source value in recipe\'s dependencies files. By default it '
+    'will be set to https://api.pollination.cloud/registries/{owner}.'
 )
 @click.option(
     '--public/--private', help='Indicate if the recipe or plugin should be created as '
     'a public or a private resource. This option does not change the visibility of a '
     'resource if it already exist.', is_flag=True, default=True
 )
+@click.option(
+    '--dry-run', '-dr', help='An option to test the command and export the package to '
+    'a folder without pushing it to endpoint.', is_flag=True, default=False
+)
 @click.pass_context
-def push_resource(ctx, resource_name, owner, endpoint, source, public):
+def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
     """Push a queenbee DSL recipe or plugin to Pollination.
 
     To run this command you need queenbee-pollination[cli] installed. You can also
@@ -131,7 +137,7 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public):
         'profile.'
 
     if ctx.obj.queenbee is None:
-        ctx.obj.queenbee = QBConfig()
+        ctx.obj.queenbee = QueenbeeContext()
 
     resource = load(resource_name, False)
 
@@ -142,18 +148,19 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public):
         cmd = recipe
         resource_type = 'recipe'
 
-    py_module = importlib.import_module(resource_name.replace('-', '_'))
-    tag = py_module.__queenbee__['tag']
+    sub_folder = resource_name.replace('_', '-').replace('pollination-', '')
 
     # write to a folder
     temp_dir = tempfile.mkdtemp()
-    folder = pathlib.Path(temp_dir, py_module.__queenbee__['name'])
+    folder = pathlib.Path(temp_dir, sub_folder)
     resource.to_folder(
         folder_path=folder,
         readme_string=_get_package_readme(resource_name)
     )
+    tag = resource.metadata.tag
     # overwite resources in dependencies
-    if resource_type == 'recipe' and source is not None:
+    if resource_type == 'recipe':
+        source = source or f'https://api.pollination.cloud/registries/{owner}'
         # update the value for source in dependencies.yaml file
         dep_file = pathlib.Path(folder, 'dependencies.yaml')
         data = yaml.safe_load(dep_file.read_bytes())
@@ -161,6 +168,9 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public):
             dep['source'] = source
         yaml.dump(data, dep_file.open('w'))
 
-    ctx.invoke(
-        cmd, path=folder, owner=owner, tag=tag, create_repo=True, public=public
-    )
+    if dry_run:
+        print(folder, file=sys.stderr)
+    else:
+        ctx.invoke(
+            cmd, path=folder, owner=owner, tag=tag, create_repo=True, public=public
+        )
