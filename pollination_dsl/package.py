@@ -77,7 +77,7 @@ class PostDevelop(develop):
 def get_requirement_version(package_name, dependency_name):
     """Get assigned version to a dependency in package requirements."""
     req = pkg_resources.get_distribution(
-        package_name.replace('pollination.', 'pollination-')
+        package_name.replace('pollination.', 'pollination_')
     ).get_metadata('requires.txt')
     requirements = {}
     for package in pkg_resources.parse_requirements(req):
