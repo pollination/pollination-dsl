@@ -80,19 +80,30 @@ class PostDevelop(develop):
 
 def get_requirement_version(package_name, dependency_name):
     """Get assigned version to a dependency in package requirements."""
-    req = pkg_resources.get_distribution(
-        package_name.replace('pollination.', 'pollination_')
-    ).get_metadata('requires.txt')
+    fixed_name = package_name.replace('pollination.', 'pollination_')
+    dependency_name = dependency_name.replace('_', '-')
     requirements = {}
-    for package in pkg_resources.parse_requirements(req):
-        version = \
-            str(package.specifier).replace('=', '').replace('>', '').replace('<', '')
-        requirements[package.project_name] = version
+    try:
+        req = pkg_resources.get_distribution(fixed_name).get_metadata('requires.txt')
+    except FileNotFoundError:
+        # try to get it from meta data
+        package_data = importlib_metadata.metadata(fixed_name)
+        for package in package_data.get_all('Requires-Dist'):
+            name, version = package.split(' (')
+            version = \
+                version.replace('=', '').replace('>', '').replace('<', '') \
+                .replace(')', '').strip()
+            requirements[name] = version
+    else:
+        for package in pkg_resources.parse_requirements(req):
+            version = \
+                str(package.specifier).replace('=', '').replace('>', '').replace('<', '')
+            requirements[package.project_name] = version
 
-    assert dependency_name.replace('_', '-') in requirements, \
+    assert dependency_name in requirements, \
         f'{dependency_name} is not a requirement for {package_name}.'
 
-    return requirements[dependency_name.replace('_', '-')]
+    return requirements[dependency_name]
 
 
 def _get_package_readme(package_name: str) -> str:
