@@ -6,11 +6,11 @@ import tempfile
 
 import click
 from click.exceptions import ClickException
-
 from queenbee.cli.context import Context as QueenbeeContext
 from queenbee.plugin.plugin import Plugin
 import yaml
 
+from queenbee_pollination.cli.push import recipe, plugin
 
 from pollination_dsl.package import translate, load, _get_package_readme, \
     _get_package_owner
@@ -27,14 +27,8 @@ def main():
 @click.pass_context
 def dsl(ctx):
     """Pollination python DSL plugin."""
-    try:
-        import queenbee_pollination
-    except ImportError:
-        # no queenbee pollination installed
-        pass
-    else:
-        from queenbee_pollination.cli.context import Context
-        ctx.obj = Context()
+    from queenbee_pollination.cli.context import Context
+    ctx.obj = Context()
 
 
 @dsl.command('translate')
@@ -125,13 +119,6 @@ def push_resource(ctx, package_name, owner, endpoint, source, public, dry_run):
             Python package.
 
     """
-    try:
-        from queenbee_pollination.cli.push import recipe, plugin
-    except ImportError:
-        raise ImportError(
-            'Failed to import queenbee_pollination. Try running '
-            '`pip install pollination-dsl[pollination]` command.'
-        )
     # set the config vars
     ctx.obj.config.endpoint = endpoint
     ctx.obj.config.token = os.getenv('QB_POLLINATION_TOKEN')
