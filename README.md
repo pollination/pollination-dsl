@@ -215,12 +215,15 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    cmdclass={'develop': PostDevelop, 'install': PostInstall},    # required - include this for pollination packaging
+    cmdclass={'develop': PostDevelop, 'install': PostInstall},              # required - include this for pollination packaging
     name='pollination-honeybee-radiance',                                   # required - will be used for package name
     packages=setuptools.find_namespace_packages(include=['pollination.*']), # required - that's how pollination find the package
     author='ladybug-tools',                                                 # required - author must match the owner account name on Pollination
     version='0.1.0',                                                        # required - will be used as package tag. you can also use semantic versioning
     zip_safe=False,                                                         # required - set to False to ensure the packaging will always work
+    project_urls={
+        'icon': 'https://ladybug.tools/assets/icon.png',                    # optional but strongly encouraged - link to package icon
+    },
     url='https://github.com/pollination/pollination-honeybee-radiance',     # optional - will be translated to home
     description='Honeybee Radiance plugin for Pollination.',                # optional - will be used as package description
     long_description=long_description,                                      # optional - will be translated to ReadMe content on Pollination
@@ -240,7 +243,6 @@ Here is an example `__init__.py` for a plugin.
 ```python
 
 __pollination__ = {
-    'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
     'config': {                   # required for Pollination - docker information for this specific plugin
         'docker': {
             'image': 'ladybugtools/honeybee-radiance:1.28.12',
@@ -256,7 +258,6 @@ Here is an example `__init__.py` for a recipe.
 from .entry import AnnualDaylightEntryPoint
 
 __pollination__ = {
-    'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
     'entry_point': AnnualDaylightEntryPoint,  # required - this will point pollination to the class that should be used to start the run
 }
 
