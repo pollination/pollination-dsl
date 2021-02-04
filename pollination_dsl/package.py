@@ -28,24 +28,34 @@ def _init_repo() -> pathlib.Path:
     the path to the repository.
     """
     HOME = pathlib.Path.home().as_posix()
-
-    if not os.access(HOME, os.W_OK):
-        path = pathlib.Path('.', 'queenbee-repository', 'pollination-dsl')
-    else:
-        path = pathlib.Path(HOME, '.queenbee', 'pollination-dsl')
+    path = pathlib.Path(HOME, 'queenbee-repository', 'pollination-dsl')
     path.mkdir(exist_ok=True)
 
+    # try to write a test file to path
+    # desprate solution to address this issue
+    # https://github.com/pollination/honeybee-radiance/pull/22/checks?check_run_id=1833376309#step:4:349
+    # tried other solutions like checking the permission but it didn't work
+    test_file = path/'test.txt'
+    try:
+        test_file.write_text('...')
+    except FileNotFoundError:
+        # use an alternative path in current working directory
+        path = pathlib.Path('pollination-dsl')
+        path.mkdir(exist_ok=True)
+    else:
+        test_file.unlink()
+
     index_file = path/'index.json'
-    if index_file.exists():
-        return path
 
     plugins_folder = path/'plugins'
     recipes_folder = path/'recipes'
     plugins_folder.mkdir(exist_ok=True)
     recipes_folder.mkdir(exist_ok=True)
-    index = RepositoryIndex.from_folder(path.as_posix())
 
-    index.to_json(index_file.as_posix(), indent=2)
+    if not index_file.exists():
+        index = RepositoryIndex.from_folder(path.as_posix())
+        index.to_json(index_file.as_posix(), indent=2)
+
     return path
 
 
