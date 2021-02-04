@@ -1,4 +1,3 @@
-import os
 import importlib
 import pkgutil
 import pkg_resources
@@ -28,22 +27,8 @@ def _init_repo() -> pathlib.Path:
     the path to the repository.
     """
     HOME = pathlib.Path.home().as_posix()
-    path = pathlib.Path(HOME, 'queenbee-repository', 'pollination-dsl')
-    path.mkdir(exist_ok=True)
-
-    # try to write a test file to path
-    # desprate solution to address this issue
-    # https://github.com/pollination/honeybee-radiance/pull/22/checks?check_run_id=1833376309#step:4:349
-    # tried other solutions like checking the permission but it didn't work
-    test_file = path/'test.txt'
-    try:
-        test_file.write_text('...')
-    except FileNotFoundError:
-        # use an alternative path in current working directory
-        path = pathlib.Path('pollination-dsl')
-        path.mkdir(exist_ok=True)
-    else:
-        test_file.unlink()
+    path = pathlib.Path(HOME, '.queenbee', 'pollination-dsl')
+    path.mkdir(parents=True, exist_ok=True)
 
     index_file = path/'index.json'
 
@@ -72,7 +57,10 @@ class PostInstall(install):
         install.run(self)
         # add queenbee package to pollination-dsl repository
         package_name = self.config_vars['dist_name']
+        # try:
         package(package_name)
+        # except Exception as error:
+        #     logging.exception('Packaging Pollination packages failed.\n')
 
 
 class PostDevelop(develop):
