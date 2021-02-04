@@ -1,3 +1,4 @@
+import os
 import importlib
 import pkgutil
 import pkg_resources
@@ -26,14 +27,14 @@ def _init_repo() -> pathlib.Path:
     if it doesn't exist. If the repository has already been created it will return
     the path to the repository.
     """
+    HOME = pathlib.Path.home().as_posix()
 
-    path = pathlib.Path.home()/'.queenbee'/'pollination-dsl'
+    if not os.access(HOME, os.W_OK):
+        path = pathlib.Path('.', 'queenbee-repository', 'pollination-dsl')
+    else:
+        path = pathlib.Path(HOME, '.queenbee', 'pollination-dsl')
     path.mkdir(exist_ok=True)
-    # in case path is not created use a temp path - this happens when the library
-    # is executed on some serverless configurations
-    if not path.exists():
-        path = pathlib.Path('queenbee-repository', 'pollination-dsl')
-        path.mkdir(exist_ok=True)
+
     index_file = path/'index.json'
     if index_file.exists():
         return path
