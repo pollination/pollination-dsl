@@ -3,6 +3,7 @@ import pkgutil
 import pkg_resources
 import pathlib
 import importlib_metadata
+import re
 
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -93,6 +94,12 @@ def get_requirement_version(package_name, dependency_name):
 def _get_package_readme(package_name: str) -> str:
     package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
     long_description = package_data.get_payload()
+    if not long_description.strip():
+        content = package_data.get('Description')
+        long_description = []
+        for line in content.split('\n'):
+            long_description.append(re.sub('^        ', '', line))
+        long_description = '\n'.join(long_description)
     return long_description
 
 
@@ -176,7 +183,7 @@ def _get_package_data(package_name: str) -> Dict:
     package_data = importlib_metadata.metadata(package_name)
 
     data = {
-        'name': package_data.get('Name'),
+        'name': package_data.get('Name').replace('pollination-', ''),
         'description': package_data.get('Summary'),
         'home': package_data.get('Home-page'),
         'tag': _get_package_version(package_data),
