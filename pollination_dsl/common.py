@@ -38,9 +38,10 @@ def import_module(name: str):
 
     return module
 
+
 @dataclass
 class _BaseClass:
-    """Base class for Queenbee DSL Function and DAG.
+    """Base class for Pollination dsl Function and DAG.
 
     Do not use this class directly.
     """
@@ -93,9 +94,9 @@ class _BaseClass:
             return self._cached_package
 
         module = importlib.import_module(self._python_package)
-        assert hasattr(module, '__queenbee__'), \
-            'Failed to find __queenbee__ info in __init__.py'
-        self._cached_package = getattr(module, '__queenbee__')
+        assert hasattr(module, '__pollination__'), \
+            'Failed to find __pollination__ info in __init__.py'
+        self._cached_package = getattr(module, '__pollination__')
         return self._cached_package
 
     @property

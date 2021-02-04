@@ -1,4 +1,5 @@
-queenbee==1.22.16
+queenbee-pollination==0.7.4
 queenbee-local==0.3.2
-click-plugins==1.1.1
+click==7.1.2
+click_plugins==1.1.1
 importlib_metadata==3.4.0

@@ -1,4 +1,4 @@
-Welcome to queenbee-dsl's documentation!
+Welcome to pollination-dsl's documentation!
 ===================================
 
 .. toctree::

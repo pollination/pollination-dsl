@@ -72,7 +72,7 @@ jobs:
         run: |
           pip install -U .
           pip install -r dev-requirements.txt
-          sphinx-apidoc -f -e -d 4 -o ./docs ./queenbee_dsl
+          sphinx-apidoc -f -e -d 4 -o ./docs ./pollination_dsl
           sphinx-build -b html ./docs ./docs/_build/docs
 
       - name: deploy to github pages

@@ -1,27 +1,32 @@
-"""Queenbee DSL command line interface."""
+"""Pollination DSL command line interface."""
 import pathlib
 import os
 import sys
-import importlib
 import tempfile
 
 import click
 from click.exceptions import ClickException
-from importlib_metadata import metadata
 
 from queenbee.cli.context import Context as QueenbeeContext
 from queenbee.plugin.plugin import Plugin
 import yaml
 
 
-from queenbee_dsl.package import translate, load, _get_package_readme
+from pollination_dsl.package import translate, load, _get_package_readme, \
+    _get_package_owner
 
 
-@click.group(help='interact with queenbee python DSL packages.')
+@click.group()
+@click.version_option()
+def main():
+    pass
+
+
+@click.group(help='interact with pollination python DSL packages.')
 @click.version_option()
 @click.pass_context
 def dsl(ctx):
-    """Queenbee Python DSL plugin."""
+    """Pollination python DSL plugin."""
     try:
         import queenbee_pollination
     except ImportError:
@@ -41,14 +46,14 @@ def dsl(ctx):
 )
 @click.option(
     '--queenbee/--luigi', is_flag=True, default=True, help='Switch between a baked '
-    'Queenbee recipe and a luigi pipeline. To translate to a luigi pipeline you must '
+    'Queenbee recipe or a luigi pipeline. To translate to a luigi pipeline you must '
     'have queenbee-luigi package installed.'
 )
 @click.pass_context
 def translate_recipe(ctx, recipe_name, target_folder, queenbee):
-    """Translate a queenbee recipe to a luigi pipeline.
+    """Translate a Pollination recipe to a Queenbee recipe or a Luigi pipeline.
 
-    Use queenbee local run command to run the pipline after export.
+    You can use queenbee local run command to run the pipline after export.
 
     \b
     Args:\b
@@ -86,8 +91,7 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
 
 
 @dsl.command('push')
-@click.argument('resource_name')
-@click.option('-o', '--owner', help='A pollination account name.')
+@click.argument('package_name')
 @click.option(
     '-e', '--endpoint', help='Endpoint to push the resource.', show_default=True,
     default='https://api.pollination.cloud'
@@ -97,7 +101,7 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
 @click.option(
     '-src', '--source', help='A link to replace the source for dependencies. This value '
     'will overwrite the source value in recipe\'s dependencies files. By default it '
-    'will be set to https://api.pollination.cloud/registries/{owner}.'
+    'will be set to https://api.pollination.cloud/registries'
 )
 @click.option(
     '--public/--private', help='Indicate if the recipe or plugin should be created as '
@@ -109,15 +113,15 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
     'a folder without pushing it to endpoint.', is_flag=True, default=False
 )
 @click.pass_context
-def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
-    """Push a queenbee DSL recipe or plugin to Pollination.
+def push_resource(ctx, package_name, owner, endpoint, source, public, dry_run):
+    """Push a pollination dsl recipe or plugin to Pollination.
 
     To run this command you need queenbee-pollination[cli] installed. You can also
-    get these libraries by running ``pip install queenbee-dsl[pollination]`` command.
+    get these libraries by running ``pip install pollination-dsl[pollination]`` command.
 
     \b
     Args:
-        resource_name: The name of the recipe or plugin. Recipe must be installed as a
+        package_name: The name of the recipe or plugin. Recipe must be installed as a
             Python package.
 
     """
@@ -126,7 +130,7 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
     except ImportError:
         raise ImportError(
             'Failed to import queenbee_pollination. Try running '
-            '`pip install queenbee-dsl[pollination]` command.'
+            '`pip install pollination-dsl[pollination]` command.'
         )
     # set the config vars
     ctx.obj.config.endpoint = endpoint
@@ -139,7 +143,10 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
     if ctx.obj.queenbee is None:
         ctx.obj.queenbee = QueenbeeContext()
 
-    resource = load(resource_name, False)
+    resource = load(package_name, False)
+
+    # get package owner
+    owner = _get_package_owner(package_name)
 
     if isinstance(resource, Plugin):
         cmd = plugin
@@ -148,24 +155,25 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
         cmd = recipe
         resource_type = 'recipe'
 
-    sub_folder = resource_name.replace('_', '-').replace('pollination-', '')
+    sub_folder = package_name.replace('_', '-').replace('pollination-', '')
 
     # write to a folder
     temp_dir = tempfile.mkdtemp()
     folder = pathlib.Path(temp_dir, sub_folder)
     resource.to_folder(
         folder_path=folder,
-        readme_string=_get_package_readme(resource_name)
+        readme_string=_get_package_readme(package_name)
     )
     tag = resource.metadata.tag
     # overwite resources in dependencies
     if resource_type == 'recipe':
-        source = source or f'https://api.pollination.cloud/registries/{owner}'
+        source = source or 'https://api.pollination.cloud/registries'
         # update the value for source in dependencies.yaml file
         dep_file = pathlib.Path(folder, 'dependencies.yaml')
         data = yaml.safe_load(dep_file.read_bytes())
         for dep in data['dependencies']:
-            dep['source'] = source
+            owner = _get_package_owner(dep['name'])
+            dep['source'] = pathlib.Path(source, owner).as_posix()
         yaml.dump(data, dep_file.open('w'))
 
     if dry_run:
@@ -174,3 +182,6 @@ def push_resource(ctx, resource_name, owner, endpoint, source, public, dry_run):
         ctx.invoke(
             cmd, path=folder, owner=owner, tag=tag, create_repo=True, public=public
         )
+
+
+main.add_command(dsl)

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'queenbee-dsl'
+project = 'pollination-dsl'
 copyright = '{}, Pollination'.format(str(now.year))
 author = 'Pollination'
 
@@ -165,7 +165,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'queenbee-dsl.tex', 'queenbee-dsl Documentation',
+    (master_doc, 'pollination-dsl.tex', 'pollination-dsl Documentation',
      'Pollination', 'manual'),
 ]
 
@@ -175,7 +175,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'queenbee-dsl', 'queenbee-dsl Documentation',
+    (master_doc, 'pollination-dsl', 'pollination-dsl Documentation',
      [author], 1)
 ]
 
@@ -186,8 +186,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'queenbee-dsl', 'queenbee-dsl Documentation',
-     author, 'queenbee-dsl', 'One line description of project.',
+    (master_doc, 'pollination-dsl', 'pollination-dsl Documentation',
+     author, 'pollination-dsl', 'One line description of project.',
      'Miscellaneous'),
 ]
 

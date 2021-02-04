@@ -1,7 +1,7 @@
-queenbee-dsl
+pollination-dsl
 =================
 
 .. toctree::
    :maxdepth: 4
 
-   queenbee_dsl
+   pollination_dsl

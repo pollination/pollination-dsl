@@ -6,28 +6,21 @@ with open('requirements.txt') as f:
 with open('README.md') as fh:
     long_description = fh.read()
 
-with open('pollination-requirements.txt') as f:
-    pollination_requirements = f.read().splitlines()
-
 setuptools.setup(
-    name="queenbee-dsl",
+    name="pollination-dsl",
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     author="Pollination",
-    author_email="info@ladybug.tools",
-    description="A Python DSL for Queenbee workflow language.",
+    author_email="info@pollination.cloud",
+    description="A Python DSL to create Pollination recipes and plugins.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pollination/queenbee-python-dsl",
-    packages=setuptools.find_packages(exclude=["tests"]),
+    url="https://github.com/pollination/pollination-dsl",
+    packages=setuptools.find_packages(exclude=["tests/*", "docs/*"]),
     include_package_data=True,
     python_requires=">=3.7",
     install_requires=requirements,
-    extras_require={'pollination': pollination_requirements},
-    entry_points='''
-        [queenbee.plugins]
-        dsl=queenbee_dsl.cli:dsl
-    ''',
+    entry_points={"console_scripts": ["pollination = pollination_dsl.cli:main"]},
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
