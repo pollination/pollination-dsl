@@ -90,8 +90,8 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
     '-e', '--endpoint', help='Endpoint to push the resource.', show_default=True,
     default='https://api.pollination.cloud'
 )
-# TODO: Add better support for mapping dependencies to sources. For now it is all
-# set to the same value which is fine for our use cases.
+# TODO: Add better support for mapping different dependencies to different sources. For
+# now it is all set to the same value which is fine for our use cases.
 @click.option(
     '-src', '--source', help='A link to replace the source for dependencies. This value '
     'will overwrite the source value in recipe\'s dependencies files. By default it '
@@ -103,11 +103,15 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
     'resource if it already exist.', is_flag=True, default=True
 )
 @click.option(
+    '--tag', '-t', help='An optional tag to enforce tag number. By default the tag will '
+    'be extracted from package version.',
+)
+@click.option(
     '--dry-run', '-dr', help='An option to test the command and export the package to '
     'a folder without pushing it to endpoint.', is_flag=True, default=False
 )
 @click.pass_context
-def push_resource(ctx, package_name, owner, endpoint, source, public, dry_run):
+def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
     """Push a pollination dsl recipe or plugin to Pollination.
 
     To run this command you need queenbee-pollination[cli] installed. You can also
@@ -147,11 +151,15 @@ def push_resource(ctx, package_name, owner, endpoint, source, public, dry_run):
     # write to a folder
     temp_dir = tempfile.mkdtemp()
     folder = pathlib.Path(temp_dir, sub_folder)
+
     resource.to_folder(
         folder_path=folder,
         readme_string=_get_package_readme(package_name)
     )
-    tag = resource.metadata.tag
+
+    if tag is None:
+        tag = resource.metadata.tag
+
     # overwite resources in dependencies
     if resource_type == 'recipe':
         source = source or 'https://api.pollination.cloud/registries'
