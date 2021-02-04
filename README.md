@@ -1,30 +1,40 @@
-# queenbee-python-dsl
-A Python Domain Specific Language (DSL) to create Queenbee Plugins and Recipes as Python
-objects.
+# pollination-dsl
+A Python Domain Specific Language (DSL) to create Pollination Plugins and Recipes.
 
-![image](https://user-images.githubusercontent.com/2915573/103444096-5a7b3880-4c33-11eb-98a3-09df1ab6c76e.png)
+Pollination uses [Queenbee](https://github.com/pollination/queenbee) as its workflow
+language. Pollination-dsl makes it easy to create Queenbee object without the need to
+learn Queenbee.
+
+![pollination-dsl](https://user-images.githubusercontent.com/2915573/106669142-36d04880-6579-11eb-9763-a718aec27166.jpg)
 
 # API docs
-[Queenbee-DSL API docs](https://pollination.github.io/queenbee-python-dsl/docs/queenbee_dsl.html#subpackages)
+[Pollination-DSL API docs](https://pollination.github.io/pollination-dsl/docs/pollination_dsl.html#subpackages)
 
 # Requirements
 Python >=3.7
 
 # Installation
+
+Using pip:
+
+`pip install pollination-dsl`
+
+For local development:
+
 1. Clone this repository.
 2. Change directory to root folder of the repository.
-3. `pip install .`
+3. `pip install -e .`
 
 # Quick Start
 
 If you are interested to start writing your own plugins and recipe see the
-[introduction post](https://github.com/pollination/queenbee-python-dsl/wiki/Introduction).
+[introduction post](https://github.com/pollination/pollination-dsl/wiki/Introduction).
 
 ## Function
 
 ```python
 from dataclasses import dataclass
-from queenbee_dsl.function import Function, command, Inputs, Outputs
+from pollination_dsl.function import Function, command, Inputs, Outputs
 
 
 @dataclass
@@ -61,8 +71,8 @@ class CreateOctreeWithSky(Function):
 
 ```
 
-The Queenbee class is accessible from `queenbee` property.
-Try `print(CreateOctreeWithSky().queenbee.yaml())` and you should see the full Queenbee
+If you want to access the `Queenbee` objects you can use `queenbee` property. For example
+try `print(CreateOctreeWithSky().queenbee.yaml())` and you should see the full Queenbee
 definition:
 
 ```yaml
@@ -127,30 +137,28 @@ command: honeybee-radiance octree from-folder model --output scene.oct --{{input
 ```
 
 Since the functions are standard Python classes you can also subclass them from one
-another.
+another as long as you use the same name for the `@command` method. Otherwise it will
+create an invalid function with two commands.
 
 ## Plugin
 
-To create a Queenbee plugin use the functions to create a standard Python module. The only
-change is that you need to provide the information for Queenbee plugin in the `__init__.py`
-file as dictionary assigned to `__queenbee__` variable.
-
-In the near future we might be able to use Python package's information to collect most
-of these information.
+To create a Pollination plugin use the functions to create a standard Python module.
+The only change is that you need to provide the information for Pollination plugin in
+the `__init__.py` file as dictionary assigned to `__pollination__` variable.
 
 Follow the standard way to install a Python package. Once the package is installed you
-can use `queenbee-dsl` to load the package or write it to a folder.
+can use `pollination-dsl` to load the package or write it to a folder.
 
 ```python
-from queenbee_dsl.package import load, write
+from pollination_dsl.package import load, write
 
-# name of the queenbee package
+# name of the pollination package
 python_package = 'pollination_honeybee_radiance'
 
-# load this package as Queenbee Plugin
+# load this package as Pollination Plugin
 plugin = load(python_package)
 
-# or write the package as a Queenbee plugin to a folder directly
+# or write the package as a Pollination plugin to a folder directly
 write(python_package, './pollination-honeybee-radiance')
 
 ```
@@ -160,21 +168,21 @@ See [`pollination-honeybee-radiance` plugin](https://github.com/pollination/poll
 ## Recipe
 
 `Recipe` is a collection of `DAG`s. Each `DAG` is a collection of interrelated `task`s.
-You can use queenbee-dsl to create complex recipes with minimum code by reusing the `functions`
-as templates for each task.
+You can use pollination-dsl to create complex recipes with minimum code by reusing the
+`functions` as templates for each task.
 
 Packaging a plugin is exactly the same as packaging a plugin.
 
 ```python
-from queenbee_dsl.package import load, translate
+from pollination_dsl.package import load, translate
 
-# name of the queenbee package
+# name of the pollination package
 python_package = 'daylight-factor'
 
-# load this package as Queenbee Recipe
+# load this package as Pollination Recipe
 recipe = load(python_package, baked=True)
 
-# or translate and write the package as a Queenbee plugin to a folder directly
+# or translate and write the package as a Pollination plugin to a folder directly
 translate(python_package, './daylight-factor')
 
 ```
@@ -182,12 +190,15 @@ translate(python_package, './daylight-factor')
 See [`daylight factor` recipe](https://github.com/pollination/ladybug-tools-recipes/tree/master/recipes/daylight-factor) for a full project example.
 
 
-# How to create a queenbee-dsl package
+# How to create a pollination-dsl package
 
-Queenbee-dsl uses Python's standard packaging to package queenbee plugins and recipes.
-It parses most of the data from inputs in `setup.py` file and some Queenbee specific
+Pollination-dsl uses Python's standard packaging to package pollination plugins and recipes.
+It parses most of the data from inputs in `setup.py` file and some Pollination specific
 information from `__init__.py` file. Below is an example of how these file should look
 like.
+
+By taking advantage of [Python's native namespace packaging](https://packaging.python.org/guides/packaging-namespace-packages/#native-namespace-packages)
+we keep all the packages under the `pollination` namespace.
 
 ## setup.py
 
@@ -196,28 +207,28 @@ like.
 #!/usr/bin/env python
 import setuptools
 
-# These two class extends setup.py to install the packages as queenbee packages
-from queenbee_dsl.package import PackageQBInstall, PackageQBDevelop
+# These two class extends setup.py to install the packages as pollination packages
+from pollination_dsl.package import PostInstall, PostDevelop
 
 # Read me will be mapped to readme strings
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    cmdclass={'develop': PackageQBDevelop, 'install': PackageQBInstall},    # required - include this for queenbee packaging
-    name='pollination-honeybee-radiance',                                   # required - will be used for package name unless it is overwritten using __queenbee__ key in __init__.py
+    cmdclass={'develop': PostDevelop, 'install': PostInstall},    # required - include this for pollination packaging
+    name='pollination-honeybee-radiance',                                   # required - will be used for package name
+    packages=setuptools.find_namespace_packages(include=['pollination.*']), # required - that's how pollination find the package
+    author='ladybug-tools',                                                 # required - author must match the owner account name on Pollination
     version='0.1.0',                                                        # required - will be used as package tag. you can also use semantic versioning
+    zip_safe=False,                                                         # required - set to False to ensure the packaging will always work
     url='https://github.com/pollination/pollination-honeybee-radiance',     # optional - will be translated to home
     description='Honeybee Radiance plugin for Pollination.',                # optional - will be used as package description
     long_description=long_description,                                      # optional - will be translated to ReadMe content on Pollination
     long_description_content_type="text/markdown",
-    author='author_1',                                                      # optional - all the information for author and maintainers will be
-    author_email='author_1@example.com',                                    # translated to maintainers. For multiple authors use comma
-    maintainer='maintainer_1, maintainer_2',                                # inside the string.
-    maintainer_email='maintainer_1@example.come, maintainer_2@example.com',
-    packages=setuptools.find_packages('pollination_honeybee_radiance'),     # required - standard python packaging input. not used by queenbee
+    maintainer='maintainer_1, maintainer_2',                                # optional - will be translated to maintainers. For multiple maintainers
+    maintainer_email='maintainer_1@example.come, maintainer_2@example.com', # use comma inside the string.
     keywords='honeybee, radiance, ladybug-tools, daylight',                 # optional - will be used as keywords
-    license='PolyForm Shield License 1.0.0, https://polyformproject.org/wp-content/uploads/2020/06/PolyForm-Shield-1.0.0.txt'  # optional - the license link should be separated by a comma
+    license='PolyForm Shield License 1.0.0, https://polyformproject.org/wp-content/uploads/2020/06/PolyForm-Shield-1.0.0.txt',  # optional - the license link should be separated by a comma
 )
 
 ```
@@ -228,8 +239,7 @@ Here is an example `__init__.py` for a plugin.
 
 ```python
 
-__queenbee__ = {
-    'name': 'honeybee-radiance',  # optional - new name for queenbee package. this will overwrite the Python package name
+__pollination__ = {
     'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
     'config': {                   # required for Pollination - docker information for this specific plugin
         'docker': {
@@ -245,10 +255,9 @@ Here is an example `__init__.py` for a recipe.
 ```python
 from .entry import AnnualDaylightEntryPoint
 
-__queenbee__ = {
-    'name': 'annual-daylight',                # optional - new name for queenbee package. this will overwrite the Python package name
+__pollination__ = {
     'icon': 'https://ladybug.tools/assets/icon.png',  # optional - package icon
-    'entry_point': AnnualDaylightEntryPoint,  # required - this will point queenbee to the class that should be used to start the run
+    'entry_point': AnnualDaylightEntryPoint,  # required - this will point pollination to the class that should be used to start the run
 }
 
 ```

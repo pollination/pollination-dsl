@@ -171,7 +171,7 @@ def task(template, needs=None, loop=None, sub_folder: str = None, sub_paths: Dic
         @task(template=Template, ...)
 
         Args:
-            template: A queenbee-dsl Function or DAG.
+            template: A pollination-dsl Function or DAG.
             needs: A list of methods that this should be executed before this task.
                 This task will only be executed after these tasks are executed
                 successfully.

@@ -25,7 +25,7 @@ def _init_repo() -> pathlib.Path:
     the path to the repository.
     """
 
-    path = pathlib.Path.home()/'.queenbee'/'queenbee-dsl'
+    path = pathlib.Path.home()/'.queenbee'/'pollination-dsl'
     path.mkdir(exist_ok=True)
     index_file = path/'index.json'
     if index_file.exists():
@@ -41,10 +41,10 @@ def _init_repo() -> pathlib.Path:
     return path
 
 
-class PackageQBInstall(install):
+class PostInstall(install):
     """A class to extend `pip install` run method.
 
-    By adding this class to setup.py this package will be added to queenbee-dsl local
+    By adding this class to setup.py this package will be added to pollination-dsl local
     repository which makes it accessible to other queenbee packages as a dependency.
 
     See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
@@ -52,15 +52,15 @@ class PackageQBInstall(install):
 
     def run(self):
         install.run(self)
-        # add queenbee package to queenbee-dsl repository
+        # add queenbee package to pollination-dsl repository
         package_name = self.config_vars['dist_name']
         package(package_name)
 
 
-class PackageQBDevelop(develop):
+class PostDevelop(develop):
     """A class to extend `pip install -e` run method.
 
-    By adding this class to setup.py this package will be added to queenbee-dsl local
+    By adding this class to setup.py this package will be added to pollination-dsl local
     repository which makes it accessible to other queenbee packages as a dependency.
 
     See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
@@ -73,9 +73,24 @@ class PackageQBDevelop(develop):
 
 
 def _get_package_readme(package_name: str) -> str:
-    package_data = importlib_metadata.metadata(package_name)
+    package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
     long_description = package_data.get_payload()
     return long_description
+
+
+def _get_package_owner(package_name: str) -> str:
+    """Author field is used for package owner."""
+    package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
+    owner = package_data.get('Author')
+    assert owner, \
+        'You must set the author of the package in setup.py to Pollination account owner'
+    # ensure there is only one author
+    owner = owner.strip()
+    assert len(owner.split(',')) == 1, \
+        'A Pollination package can only have one author. Use maintainer field for ' \
+        'providing multiple maintainers.'
+
+    return owner
 
 
 def _get_package_license(package_data: Dict) -> Dict:
@@ -99,32 +114,35 @@ def _get_package_keywords(package_data: Dict) -> List:
 
 
 def _get_package_maintainers(package_data: Dict) -> List[Dict]:
-    info = []
+    package_maintainers = []
     maintainer = package_data.get('Maintainer')
     maintainer_email = package_data.get('Maintainer-email')
-    author = package_data.get('Author')
-    author_email = package_data.get('Author-email')
-
-    if author:
-        authors = [m.strip() for m in author.split(',')]
-        if author_email:
-            emails = [m.strip() for m in author_email.split(',')]
-            for name, email in zip(authors, emails):
-                info.append({'name': name, 'email': email})
-        else:
-            for name in authors:
-                info.append({'name': name, 'email': None})
 
     if maintainer:
         maintainers = [m.strip() for m in maintainer.split(',')]
         if maintainer_email:
             emails = [m.strip() for m in maintainer_email.split(',')]
             for name, email in zip(maintainers, emails):
-                info.append({'name': name, 'email': email})
+                package_maintainers.append({'name': name, 'email': email})
         else:
             for name in maintainers:
-                info.append({'name': name, 'email': None})
-    return info
+                package_maintainers.append({'name': name, 'email': None})
+    return package_maintainers
+
+
+def _get_package_version(package_data: Dict) -> str:
+    """Get package version.
+
+    This function returns the non-development version for a development version.
+    It removes the .dev part and return x.y.z-1 version if it is a dev version.
+    """
+    version = package_data.get('Version')
+    xyz = version.split('.')
+    if len(xyz) <= 3:
+        return version
+    # clean up the developer version
+    x, y, z = xyz[:3]
+    return f'{x}.{y}.{int(z) - 1}'
 
 
 def _get_package_data(package_name: str) -> Dict:
@@ -135,7 +153,7 @@ def _get_package_data(package_name: str) -> Dict:
         'name': package_data.get('Name'),
         'description': package_data.get('Summary'),
         'home': package_data.get('Home-page'),
-        'tag': package_data.get('Version'),
+        'tag': _get_package_version(package_data),
         'keywords': _get_package_keywords(package_data),
         'maintainers': _get_package_maintainers(package_data),
         'license': _get_package_license(package_data)
@@ -145,7 +163,7 @@ def _get_package_data(package_name: str) -> Dict:
 
 
 def _get_meta_data(module, package_type: str) -> MetaData:
-    qb_info = module.__queenbee__
+    qb_info = module.__pollination__
     package_data = _get_package_data(module.__name__)
 
     if package_type == 'plugin':
@@ -179,7 +197,7 @@ def _load_plugin(module) -> Plugin:
     returns:
         Plugin - A Queenbee plugin
     """
-    qb_info = module.__queenbee__
+    qb_info = module.__pollination__
     package_name = module.__name__
     # get metadata
     config = PluginConfig.parse_obj(qb_info['config'])
@@ -215,11 +233,11 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     returns:
         Recipe - A Queenbee recipe. It will be a baked recipe if baked is set to True.
     """
-    qb_info = module.__queenbee__
+    qb_info = module.__pollination__
     package_name = module.__name__
 
     main_dag = qb_info.get('entry_point', None)()
-    assert main_dag, f'{package_name} __queenbee__ info is missing the enetry_point key.'
+    assert main_dag, f'{package_name} __pollination__ info is missing the enetry_point key.'
 
     # get metadata
     metadata = _get_meta_data(module, 'recipe')
@@ -250,7 +268,7 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     recipe = Recipe(metadata=metadata, dependencies=plugins + recipes, flow=dags)
 
     if baked:
-        rf = RepositoryReference(name='queenbee-dsl', path='file:///' + repo.as_posix())
+        rf = RepositoryReference(name='pollination-dsl', path='file:///' + repo.as_posix())
         config = Config(repositories=[rf])
         recipe = BakedRecipe.from_recipe(recipe=recipe, config=config)
 
@@ -265,9 +283,9 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
     """
     module = import_module(package_name)
 
-    assert hasattr(module, '__queenbee__'), \
-        'Failed to find __queenbee__ info in __init__.py'
-    qb_info = getattr(module, '__queenbee__')
+    assert hasattr(module, '__pollination__'), \
+        'Failed to find __pollination__ info in __init__.py'
+    qb_info = getattr(module, '__pollination__')
     if 'config' in qb_info:
         # it's a plugin
         return _load_plugin(module)
@@ -295,7 +313,7 @@ def package(package_name: str, readme: str = None) -> None:
     else:
         raise TypeError('Input package must be a Queenbee Plugin or a Queenbee Recipe.')
 
-    # add to queenbee-dsl repository
+    # add to pollination-dsl repository
     try:
         plugin_version, file_object = PackageVersion.package_resource(
             qb_obj, readme=_get_package_readme(package_name)

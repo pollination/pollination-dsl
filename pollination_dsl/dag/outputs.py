@@ -1,4 +1,4 @@
-from queenbee_dsl.alias.outputs import OutputAliasTypes
+from pollination_dsl.alias.outputs import OutputAliasTypes
 from typing import Any, Dict, List
 from dataclasses import dataclass
 
