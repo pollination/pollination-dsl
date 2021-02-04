@@ -1,5 +1,6 @@
 import importlib
 import pkgutil
+import pkg_resources
 import pathlib
 import importlib_metadata
 
@@ -72,6 +73,23 @@ class PostDevelop(develop):
         package(package_name)
 
 
+def get_requirement_version(package_name, dependency_name):
+    """Get assigned version to a dependency in package requirements."""
+    req = pkg_resources.get_distribution(
+        package_name.replace('pollination.', 'pollination-')
+    ).get_metadata('requires.txt')
+    requirements = {}
+    for package in pkg_resources.parse_requirements(req):
+        version = \
+            str(package.specifier).replace('=', '').replace('>', '').replace('<', '')
+        requirements[package.project_name] = version
+
+    assert dependency_name.replace('_', '-') in requirements, \
+        f'{dependency_name} is not a requirement for {package_name}.'
+
+    return requirements[dependency_name.replace('_', '-')]
+
+
 def _get_package_readme(package_name: str) -> str:
     package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
     long_description = package_data.get_payload()
@@ -111,6 +129,14 @@ def _get_package_keywords(package_data: Dict) -> List:
     if keywords:
         keywords = [key.strip() for key in keywords.split(',')]
     return keywords
+
+
+def _get_package_icon(package_data: Dict) -> str:
+    urls = package_data.get_all('Project-URL')
+    for url in urls:
+        key, value = url.split(',')
+        if key == 'icon':
+            return value.strip()
 
 
 def _get_package_maintainers(package_data: Dict) -> List[Dict]:
@@ -156,7 +182,8 @@ def _get_package_data(package_name: str) -> Dict:
         'tag': _get_package_version(package_data),
         'keywords': _get_package_keywords(package_data),
         'maintainers': _get_package_maintainers(package_data),
-        'license': _get_package_license(package_data)
+        'license': _get_package_license(package_data),
+        'icon': _get_package_icon(package_data)
     }
 
     return data
