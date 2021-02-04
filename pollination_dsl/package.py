@@ -29,6 +29,11 @@ def _init_repo() -> pathlib.Path:
 
     path = pathlib.Path.home()/'.queenbee'/'pollination-dsl'
     path.mkdir(exist_ok=True)
+    # in case path is not created use a temp path - this happens when the library
+    # is executed on some serverless configurations
+    if not path.exists():
+        path = pathlib.Path('queenbee-repository', 'pollination-dsl')
+        path.mkdir(exist_ok=True)
     index_file = path/'index.json'
     if index_file.exists():
         return path
