@@ -15,7 +15,7 @@ def import_module(name: str):
 
     This function works for both namespace and non-name space Python modules.
     """
-    package_name = name.replace('-', '_')
+    package_name = name.replace('-', '_').replace('***', 'pollination')
     err_msg = \
         f'No module named \'{package_name}\'. Did you forget to install the module?\n' \
         'You can use `pip install` command to install the package from a local ' \

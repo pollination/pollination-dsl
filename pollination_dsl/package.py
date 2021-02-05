@@ -80,7 +80,8 @@ class PostDevelop(develop):
 
 def get_requirement_version(package_name, dependency_name):
     """Get assigned version to a dependency in package requirements."""
-    fixed_name = package_name.replace('pollination.', 'pollination_')
+    fixed_name = package_name.replace('pollination.', 'pollination_') \
+        .replace('***', 'pollination')
     dependency_name = dependency_name.replace('_', '-')
     requirements = {}
     try:
@@ -88,7 +89,8 @@ def get_requirement_version(package_name, dependency_name):
     except FileNotFoundError:
         # try to get it from meta data
         package_data = importlib_metadata.metadata(fixed_name)
-        for package in package_data.get_all('Requires-Dist'):
+        req_dists = package_data.get_all('Requires-Dist') or []
+        for package in req_dists:
             name, version = package.split(' (')
             version = \
                 version.replace('=', '').replace('>', '').replace('<', '') \
