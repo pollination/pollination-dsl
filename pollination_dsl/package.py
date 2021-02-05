@@ -1,6 +1,7 @@
 import importlib
 import pkgutil
 import pathlib
+import warnings
 
 from setuptools.command.develop import develop
 from setuptools.command.install import install
@@ -13,7 +14,8 @@ from queenbee.repository.index import RepositoryIndex
 from queenbee.config import Config, RepositoryReference
 
 from .function import Function
-from .common import import_module, _get_meta_data, _get_package_readme
+from .common import import_module, _get_meta_data, _get_package_readme, \
+    get_requirement_version
 
 
 def _init_repo() -> pathlib.Path:
@@ -54,10 +56,7 @@ class PostInstall(install):
         install.run(self)
         # add queenbee package to pollination-dsl repository
         package_name = self.config_vars['dist_name']
-        # try:
         package(package_name)
-        # except Exception as error:
-        #     logging.exception('Packaging Pollination packages failed.\n')
 
 
 class PostDevelop(develop):
@@ -126,8 +125,11 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     qb_info = module.__pollination__
     package_name = module.__name__
 
-    main_dag = qb_info.get('entry_point', None)()
-    assert main_dag, f'{package_name} __pollination__ info is missing the enetry_point key.'
+    main_dag_entry = qb_info.get('entry_point', None)
+    assert main_dag_entry, \
+        f'{package_name} __pollination__ info is missing the enetry_point key.'
+
+    main_dag = main_dag_entry()
 
     # get metadata
     metadata = _get_meta_data(module, 'recipe')
@@ -178,10 +180,25 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
     qb_info = getattr(module, '__pollination__')
     if 'config' in qb_info:
         # it's a plugin
-        return _load_plugin(module)
+        package = _load_plugin(module)
     else:
         # it's a recipe
-        return _load_recipe(module, baked)
+        package = _load_recipe(module, baked)
+        # try to update recipe tag based on requirements
+        for dep in package.dependencies:
+            name = f'pollination-{dep.name}'
+            try:
+                tag = get_requirement_version(package_name, name)
+            except AssertionError:
+                warnings.warn(
+                    f'{package_name} has dependencies on {name} but it is not set as one '
+                    'of the package dependencies in setup.py. Will use the version of the '
+                    'currently installed version instead.'
+                )
+            else:
+                dep.tag = tag
+
+    return package
 
 
 def package(package_name: str, readme: str = None) -> None:
