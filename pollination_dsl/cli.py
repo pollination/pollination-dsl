@@ -12,8 +12,8 @@ import yaml
 
 from queenbee_pollination.cli.push import recipe, plugin
 
-from pollination_dsl.package import translate, load, _get_package_readme, \
-    _get_package_owner
+from pollination_dsl.package import translate, load
+from pollination_dsl.common import _get_package_readme, _get_package_owner
 
 
 @click.group()
