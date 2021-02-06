@@ -132,10 +132,11 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
     # set the config vars
     ctx.obj.config.endpoint = endpoint
     ctx.obj.config.token = os.getenv('QB_POLLINATION_TOKEN')
-    assert ctx.obj.config.token is not None, \
-        'Pollination token is not set. Use QB_POLLINATION_TOKEN to set it as an env ' \
-        'variable. You can generate an API key under settings from your Pollination ' \
-        'profile.'
+    if not dry_run:
+        assert ctx.obj.config.token is not None, \
+            'Pollination token is not set. Use QB_POLLINATION_TOKEN to set it as an ' \
+            'env variable. You can generate an API key under settings from your ' \
+            'Pollination profile.'
 
     if ctx.obj.queenbee is None:
         ctx.obj.queenbee = QueenbeeContext()
@@ -173,7 +174,8 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
         dep_file = pathlib.Path(folder, 'dependencies.yaml')
         data = yaml.safe_load(dep_file.read_bytes())
         for dep in data['dependencies']:
-            owner = _get_package_owner(dep['name'])
+            dep_name = f'pollination-{dep["name"]}'
+            owner = _get_package_owner(dep_name)
             dep['source'] = pathlib.Path(source, owner).as_posix()
         yaml.dump(data, dep_file.open('w'))
 
