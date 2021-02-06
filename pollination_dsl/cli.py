@@ -11,8 +11,8 @@ from queenbee.plugin.plugin import Plugin
 import yaml
 
 from queenbee_pollination.cli.push import recipe, plugin
-
-from pollination_dsl.package import translate, load
+from queenbee_local.cli import run_recipe
+from pollination_dsl.package import translate, load, _init_repo
 from pollination_dsl.common import _get_package_readme, _get_package_owner
 
 
@@ -44,7 +44,7 @@ def dsl(ctx):
     'have queenbee-luigi package installed.'
 )
 @click.pass_context
-def translate_recipe(ctx, recipe_name, target_folder, queenbee):
+def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
     """Translate a Pollination recipe to a Queenbee recipe or a Luigi pipeline.
 
     You can use queenbee local run command to run the pipline after export.
@@ -57,10 +57,14 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
     """
     folder = pathlib.Path(target_folder)
     folder.mkdir(exist_ok=True)
+    if not recipe_name.startswith('pollination'):
+        recipe_name = f'pollination-{recipe_name}'
 
     if queenbee:
         recipe_folder = translate(recipe_name, target_folder=target_folder, baked=True)
         print(f'Success: {recipe_folder}', file=sys.stderr)
+        if no_exit:
+            return
         return sys.exit(0)
 
     else:
@@ -81,6 +85,8 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee):
             return sys.exit(1)
         else:
             print(f'Success: {recipe_folder}', file=sys.stderr)
+            if no_exit:
+                return
             return sys.exit(0)
 
 
@@ -177,6 +183,69 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
         ctx.invoke(
             cmd, path=folder, owner=owner, tag=tag, create_repo=True, public=public
         )
+
+
+@dsl.command('run')
+@click.argument('recipe_name')
+@click.argument(
+    'project_folder',
+    type=click.Path(exists=True, file_okay=False, resolve_path=True, dir_okay=True),
+    default='.'
+)
+@click.option(
+    '-i', '--inputs',
+    type=click.Path(exists=True, file_okay=True, resolve_path=True, dir_okay=False),
+    default=None, show_default=True, help='Path to the JSON file to'
+    ' overwrite inputs for this recipe.'
+)
+@click.option(
+    '-w', '--workers', type=int, default=1, show_default=True,
+    help='Number of workers to execute tasks in parallel.'
+)
+@click.option(
+    '-e', '--env', multiple=True, help='An option to pass environmental variables to '
+    'commands. Use = to separate key and value. RAYPATH=/usr/local/lib/ray'
+)
+@click.option('-n', '--name', help='Simulation name for this run.')
+@click.option(
+    '-d', '--debug',
+    type=click.Path(exists=False, file_okay=False, resolve_path=True, dir_okay=True),
+    help='Optional path to a debug folder. If debug folder is provided all the steps '
+    'of the simulation will be executed inside the debug folder which can be used for '
+    'furthur inspection.'
+)
+@click.pass_context
+def run(ctx, recipe_name, project_folder, inputs, workers, env, name, debug):
+    """Execute a recipe against a project folder.
+
+    \b
+    Args:
+        recipe_name: Name of the recipe (e.g. pollination-daylight-factor)
+        project_folder: Path to project folder. Project folder includes the input files
+            and folders for the recipe.
+
+    """
+    # translate the recipe if it hasn't been translated already
+    target_folder = _init_repo().parent / 'pollination-luigi'
+    # TODO: Check for the recipe from the same version and don't generate it every
+    # time. Add an overwrite option to the command.
+    ctx.invoke(
+        translate_recipe,
+        recipe_name=recipe_name,
+        target_folder=target_folder.as_posix(),
+        queenbee=False,
+        no_exit=True
+    )
+    # get clean recipe name
+    recipe_name = recipe_name.replace('pollination-', '').replace('pollination', '') \
+        .replace('-', '_')
+    recipe_folder = target_folder / recipe_name.replace('pollination-', '')
+
+    # run the recipe using queenbee-local
+    ctx.invoke(
+        run_recipe, recipe=recipe_folder, project_folder=project_folder, inputs=inputs,
+        workers=workers, env=env, name=name, debug=debug
+    )
 
 
 main.add_command(dsl)
