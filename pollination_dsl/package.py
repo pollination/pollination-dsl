@@ -2,9 +2,6 @@ import importlib
 import pkgutil
 import pathlib
 import warnings
-
-from setuptools.command.develop import develop
-from setuptools.command.install import install
 from typing import Union
 
 from queenbee.plugin.plugin import Plugin, PluginConfig
@@ -15,7 +12,7 @@ from queenbee.config import Config, RepositoryReference
 
 from .function import Function
 from .common import import_module, _get_meta_data, _get_package_readme, \
-    get_requirement_version
+    get_requirement_version, name_to_pollination
 
 
 def _init_repo() -> pathlib.Path:
@@ -41,37 +38,6 @@ def _init_repo() -> pathlib.Path:
         index.to_json(index_file.as_posix(), indent=2)
 
     return path
-
-
-class PostInstall(install):
-    """A class to extend `pip install` run method.
-
-    By adding this class to setup.py this package will be added to pollination-dsl local
-    repository which makes it accessible to other queenbee packages as a dependency.
-
-    See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
-    """
-
-    def run(self):
-        install.run(self)
-        # add queenbee package to pollination-dsl repository
-        package_name = self.config_vars['dist_name']
-        package(package_name)
-
-
-class PostDevelop(develop):
-    """A class to extend `pip install -e` run method.
-
-    By adding this class to setup.py this package will be added to pollination-dsl local
-    repository which makes it accessible to other queenbee packages as a dependency.
-
-    See here for an example: https://github.com/pollination/honeybee-radiance-pollination/blob/0b5590f691427f256beb77b37bd43f545106eaf1/setup.py#L3-L14
-    """
-
-    def run(self):
-        develop.run(self)
-        package_name = self.config_vars['dist_name']
-        package(package_name)
 
 
 def _load_plugin(module) -> Plugin:
@@ -107,6 +73,17 @@ def _load_plugin(module) -> Plugin:
 
     plugin = Plugin(config=config, metadata=metadata, functions=functions)
     return plugin
+
+
+def package_recipe_dependencies(recipe: Recipe) -> None:
+    """Try to load/package recipe dependencies from local registry.
+
+    If the dependency is not available in local registry then it will try to package
+    it from a local python installation. If that also fails it will try to pull it
+    down using pip install.
+    """
+    for dep in recipe.dependencies:
+        package(dep.name)
 
 
 def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
@@ -160,6 +137,7 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
     recipe = Recipe(metadata=metadata, dependencies=plugins + recipes, flow=dags)
 
     if baked:
+        package_recipe_dependencies(recipe)
         rf = RepositoryReference(name='pollination-dsl', path='file:///' + repo.as_posix())
         config = Config(repositories=[rf])
         recipe = BakedRecipe.from_recipe(recipe=recipe, config=config)
@@ -186,7 +164,7 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
         package = _load_recipe(module, baked)
         # try to update recipe tag based on requirements
         for dep in package.dependencies:
-            name = f'pollination-{dep.name}'
+            name = name_to_pollination(dep.name)
             try:
                 tag = get_requirement_version(package_name, name)
             except AssertionError:
@@ -215,6 +193,7 @@ def package(package_name: str, readme: str = None) -> None:
 
     if isinstance(qb_obj, Recipe):
         qb_type = 'recipe'
+        package_recipe_dependencies(qb_obj)
     elif isinstance(qb_obj, Plugin):
         qb_type = 'plugin'
     else:
