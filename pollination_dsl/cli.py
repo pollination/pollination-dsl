@@ -13,7 +13,8 @@ import yaml
 from queenbee_pollination.cli.push import recipe, plugin
 from queenbee_local.cli import run_recipe
 from pollination_dsl.package import translate, load, _init_repo
-from pollination_dsl.common import _get_package_readme, _get_package_owner
+from pollination_dsl.common import _get_package_readme, _get_package_owner, \
+    name_to_pollination
 
 
 @click.group()
@@ -174,7 +175,7 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
         dep_file = pathlib.Path(folder, 'dependencies.yaml')
         data = yaml.safe_load(dep_file.read_bytes())
         for dep in data['dependencies']:
-            dep_name = f'pollination-{dep["name"]}'
+            dep_name = name_to_pollination(dep['name'])
             owner = _get_package_owner(dep_name)
             dep['source'] = pathlib.Path(source, owner).as_posix()
         yaml.dump(data, dep_file.open('w'))
@@ -239,9 +240,10 @@ def run(ctx, recipe_name, project_folder, inputs, workers, env, name, debug):
         no_exit=True
     )
     # get clean recipe name
-    recipe_name = recipe_name.replace('pollination-', '').replace('pollination', '') \
-        .replace('-', '_')
-    recipe_folder = target_folder / recipe_name.replace('pollination-', '')
+    recipe_name = recipe_name.replace('-', '_').replace('pollination_', '') \
+        .replace('pollination.', '')
+
+    recipe_folder = target_folder / recipe_name
 
     # run the recipe using queenbee-local
     ctx.invoke(
