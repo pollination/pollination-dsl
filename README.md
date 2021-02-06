@@ -25,11 +25,6 @@ For local development:
 2. Change directory to root folder of the repository.
 3. `pip install -e .`
 
-# Quick Start
-
-If you are interested to start writing your own plugins and recipe see the
-[introduction post](https://github.com/pollination/pollination-dsl/wiki/Introduction).
-
 ## Function
 
 ```python
@@ -208,14 +203,21 @@ we keep all the packages under the `pollination` namespace.
 import setuptools
 
 # These two class extends setup.py to install the packages as pollination packages
-from pollination_dsl.package import PostInstall, PostDevelop
+try:
+    from pollination_dsl.package import PostInstall, PostDevelop
+    cmd_class = {'develop': PostDevelop, 'install': PostInstall}
+except ModuleNotFoundError:
+    # this will happen the very first time when pollination_dsl is not installed
+    # to avoid this issue use pip install pollination_dsl first before installing
+    # pollination packages
+    cmd_class = {}
 
 # Read me will be mapped to readme strings
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    cmdclass={'develop': PostDevelop, 'install': PostInstall},              # required - include this for pollination packaging
+    cmdclass=cmd_class,                                                     # required - include this for pollination packaging
     name='pollination-honeybee-radiance',                                   # required - will be used for package name
     packages=setuptools.find_namespace_packages(include=['pollination.*']), # required - that's how pollination find the package
     author='ladybug-tools',                                                 # required - author must match the owner account name on Pollination
