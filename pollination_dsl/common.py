@@ -21,7 +21,7 @@ def import_module(name: str):
 
     This function works for both namespace and non-name space Python modules.
     """
-    package_name = name.replace('-', '_').replace('***', 'pollination')
+    package_name = name.replace('-', '_')
     err_msg = \
         f'No module named \'{package_name}\'. Did you forget to install the module?\n' \
         'You can use `pip install` command to install the package from a local ' \
@@ -47,8 +47,7 @@ def import_module(name: str):
 
 def get_requirement_version(package_name, dependency_name):
     """Get assigned version to a dependency in package requirements."""
-    fixed_name = package_name.replace('pollination.', 'pollination_') \
-        .replace('***', 'pollination')
+    fixed_name = package_name.replace('pollination.', 'pollination_')
     dependency_name = dependency_name.replace('_', '-')
     requirements = {}
     try:
@@ -95,7 +94,7 @@ def get_docker_image_from_dependency(package, dependency, owner):
         # is built and where! It's better to set it to latest instead of failing.
         warnings.warn(
             f'Failed to pinpoint the version for {dependency} as a dependency for'
-            f' {__package__}. Will set the docker version to latest.\n{error}'
+            f' {package}. Will set the docker version to latest.\n{error}'
         )
         image_id = f'ladybugtools/{dependency}:latest'
 
