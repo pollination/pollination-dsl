@@ -226,7 +226,14 @@ def _get_package_version(package_data: Dict) -> str:
         return version
     # clean up the developer version
     x, y, z = xyz[:3]
-    return f'{x}.{y}.{int(z) - 1}'
+
+    try:
+        version = f'{x}.{y}.{int(z) - 1}'
+    except ValueError:
+        # development version like 0.1.dev1+gf910655.d20210207
+        version = f'{x}.{y}.0'
+
+    return version
 
 
 def _get_package_data(package_name: str) -> Dict:
