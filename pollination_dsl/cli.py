@@ -177,7 +177,7 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
         for dep in data['dependencies']:
             dep_name = name_to_pollination(dep['name'])
             owner = _get_package_owner(dep_name)
-            dep['source'] = pathlib.Path(source, owner).as_posix()
+            dep['source'] = os.path.join(source, owner).replace('\\', '/')
         yaml.dump(data, dep_file.open('w'))
 
     if dry_run:
