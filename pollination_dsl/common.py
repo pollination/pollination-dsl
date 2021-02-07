@@ -172,10 +172,21 @@ def _get_package_license(package_data: Dict) -> Dict:
 
 
 def _get_package_keywords(package_data: Dict) -> List:
-    keywords = package_data.get('Keyword')
+    keywords = package_data.get('Keywords')
     if keywords:
         keywords = [key.strip() for key in keywords.split(',')]
     return keywords
+
+
+def _get_package_sources(package_data: Dict) -> str:
+    urls = package_data.get_all('Project-URL')
+    sources = []
+    for url in urls:
+        key, value = url.split(',')
+        if key == 'icon':
+            continue
+        sources.append(value.strip())
+    return sources
 
 
 def _get_package_icon(package_data: Dict) -> str:
@@ -230,7 +241,8 @@ def _get_package_data(package_name: str) -> Dict:
         'keywords': _get_package_keywords(package_data),
         'maintainers': _get_package_maintainers(package_data),
         'license': _get_package_license(package_data),
-        'icon': _get_package_icon(package_data)
+        'icon': _get_package_icon(package_data),
+        'sources': _get_package_sources(package_data)
     }
 
     return data
