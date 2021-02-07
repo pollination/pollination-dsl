@@ -176,9 +176,11 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
         data = yaml.safe_load(dep_file.read_bytes())
         for dep in data['dependencies']:
             dep_name = name_to_pollination(dep['name'])
-            owner = _get_package_owner(dep_name)
-            dep['source'] = os.path.join(source, owner).replace('\\', '/')
+            dep_owner = _get_package_owner(dep_name)
+            dep['source'] = os.path.join(source, dep_owner).replace('\\', '/')
         yaml.dump(data, dep_file.open('w'))
+
+    print(f'pushing {owner}/{sub_folder}:{tag} to {endpoint}')
 
     if dry_run:
         print(folder, file=sys.stderr)
