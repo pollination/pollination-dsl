@@ -103,7 +103,7 @@ class DAG(_BaseClass):
         cls = self.__class__
         dag_package = self._package
         dependencies = {'plugin': [], 'recipe': [], 'dag': []}
-        for method_name, method in inspect.getmembers(cls):
+        for _, method in inspect.getmembers(cls):
             # try to get decorator
             qb_dec = getattr(method, '__decorator__', None)
             if qb_dec == 'task':
@@ -121,5 +121,13 @@ class DAG(_BaseClass):
                 elif tt.__decorator__ == 'function':
                     if tt._package not in dependencies['plugin']:
                         dependencies['plugin'].append(tt._package)
+
+        # add dependencies of dag dependencies
+        for dag in dependencies['dag']:
+            deps = dag._dependencies
+            for key, sub_deps in deps.items():
+                for v in sub_deps:
+                    if v not in dependencies[key]:
+                        dependencies[key].append(v)
 
         return dependencies
