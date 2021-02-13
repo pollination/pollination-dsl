@@ -132,7 +132,8 @@ def get_docker_image_from_dependency(package, dependency, owner):
 
 
 def _get_package_readme(package_name: str) -> str:
-    package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
+    package_name = name_to_pollination(package_name).replace('-', '_')
+    package_data = importlib_metadata.metadata(package_name)
     long_description = package_data.get_payload()
     if not long_description.strip():
         content = package_data.get('Description')
@@ -145,7 +146,8 @@ def _get_package_readme(package_name: str) -> str:
 
 def _get_package_owner(package_name: str) -> str:
     """Author field is used for package owner."""
-    package_data = importlib_metadata.metadata(package_name.replace('-', '_'))
+    package_name = name_to_pollination(package_name).replace('-', '_')
+    package_data = importlib_metadata.metadata(package_name)
     owner = package_data.get('Author')
     assert owner, \
         'You must set the author of the package in setup.py to Pollination account owner'
@@ -237,7 +239,8 @@ def _get_package_version(package_data: Dict) -> str:
 
 
 def _get_package_data(package_name: str) -> Dict:
-
+    """Get package data as a dictionary."""
+    package_name = name_to_pollination(package_name).replace('-', '_')
     package_data = importlib_metadata.metadata(package_name)
 
     data = {
