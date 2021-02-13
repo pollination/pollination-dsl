@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import NamedTuple, Dict, List
-import importlib
 from collections import namedtuple
 import importlib_metadata
 import re
