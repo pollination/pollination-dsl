@@ -107,7 +107,15 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
                 arg = TaskArgument.parse_obj(arg_dict)
         else:
             # value reference
-            func_input = getattr(template._inputs, name)['value']
+            try:
+                func_input = getattr(template._inputs, name)['value']
+            except AttributeError:
+                raise AttributeError(
+                    f'Invalid argument in task "{func.__name__}": "{name}" is not a ' \
+                    f'valid argument for "{template.__class__.__name__}". Valid '\
+                    f'arguments are {template._inputs._fields}.'
+                )
+
             if func_input.is_artifact:
 
                 arg_dict['from']['path'] = value_info
