@@ -3,6 +3,7 @@ import pathlib
 import os
 import sys
 import tempfile
+import shutil
 
 import click
 from click.exceptions import ClickException
@@ -213,6 +214,11 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
 )
 @click.option('-n', '--name', help='Simulation name for this run.')
 @click.option(
+    '-f', '--force', help='By default run command reuses the results from a previous '
+    'simulation if they exist. This option will ignore any previous results by trying '
+    'to delete the folder and running a new simulation.', is_flag=True
+)
+@click.option(
     '-d', '--debug',
     type=click.Path(exists=False, file_okay=False, resolve_path=True, dir_okay=True),
     help='Optional path to a debug folder. If debug folder is provided all the steps '
@@ -220,7 +226,7 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
     'furthur inspection.'
 )
 @click.pass_context
-def run(ctx, recipe_name, project_folder, inputs, workers, env, name, debug):
+def run(ctx, recipe_name, project_folder, inputs, workers, env, name, force, debug):
     """Execute a recipe against a project folder.
 
     \b
@@ -246,6 +252,15 @@ def run(ctx, recipe_name, project_folder, inputs, workers, env, name, debug):
         .replace('pollination.', '')
 
     recipe_folder = target_folder / recipe_name
+
+    if name and force:
+        run_folder = pathlib.Path(project_folder, name)
+        if run_folder.exists():
+            print(
+                'A previous run with the same name already exist. '
+                'Removing the previous run...'
+            )
+            shutil.rmtree(run_folder.as_posix(), ignore_errors=True)
 
     # run the recipe using queenbee-local
     ctx.invoke(
