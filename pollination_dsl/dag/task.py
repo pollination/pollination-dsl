@@ -70,7 +70,14 @@ def _get_from(value, inputs_info) -> Dict:
         # Task reference values and names are nested
         variable = value['name']
         value = value['value']
-        return {'type': value.reference_type, 'name': parent, 'variable': variable}
+        type_ = value.reference_type
+        if not type_.startswith('Task'):
+            # from a recipe - add a Task in front of it
+            # FolderReference -> TaskFolderReference
+            type_ = f'Task{type_}'
+        return {
+            'type': type_, 'name': parent, 'variable': variable
+        }
 
 
 def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
@@ -85,7 +92,6 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
         return task_args
 
     values = func_args.defaults
-
     for name, value_info in zip(names, values):
         from_ = _get_from(value_info, inputs_info)
         arg_dict = {'name': name.replace('_', '-'), 'from': from_}
