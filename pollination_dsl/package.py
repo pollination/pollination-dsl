@@ -138,7 +138,9 @@ def _load_recipe(module, baked: bool = False) -> Union[BakedRecipe, Recipe]:
 
     if baked:
         package_recipe_dependencies(recipe)
-        rf = RepositoryReference(name='pollination-dsl', path='file:///' + repo.as_posix())
+        rf = RepositoryReference(
+            name='pollination-dsl', path='file:///' + repo.as_posix()
+        )
         config = Config(repositories=[rf])
         recipe = BakedRecipe.from_recipe(recipe=recipe, config=config)
 
@@ -157,9 +159,11 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
         'Failed to find __pollination__ info in __init__.py'
     qb_info = getattr(module, '__pollination__')
     if 'config' in qb_info:
+        print(f'loading plugin: {package_name}')
         # it's a plugin
         package = _load_plugin(module)
-    else:
+    elif 'entry_point' in qb_info:
+        print(f'loading recipe: {package_name}')
         # it's a recipe
         package = _load_recipe(module, baked)
         # try to update recipe tag based on requirements
@@ -175,6 +179,11 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
                 )
             else:
                 dep.tag = tag
+    else:
+        raise ValueError(
+            f'Error loading {package_name}. Package must be a DSL plugin or a DSL '
+            f'recipe.'
+        )
 
     return package
 
