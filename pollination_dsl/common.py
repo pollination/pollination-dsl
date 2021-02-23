@@ -103,20 +103,24 @@ def get_requirement_version(package_name, dependency_name):
     return requirements[dependency_name]
 
 
-def get_docker_image_from_dependency(package, dependency, owner):
+def get_docker_image_from_dependency(package, dependency, owner, alias=None):
     """Get a docker image id from package information.
 
     Arguments:
         package: Name of the package (e.g. pollination-honeybee-radiance)
         dependency: Name of the dependency (e.g. honeybee-radiance)
         owner: The account owner for docker image
+        alias: An alias name for the docker image. This input is useful in cases that
+            docker image name (e.g. ladybug) is different from the dependency name
+            (e.g. ladybug-core).
 
     Returns:
         str -- docker image id (e.g. ladybugtools/honeybee-radiance:0.5.2)
     """
+    image_name = alias if alias else dependency
     try:
         image_version = get_requirement_version(package, dependency)
-        image_id = f'ladybugtools/{dependency}:{image_version}'
+        image_id = f'{owner}/{image_name}:{image_version}'
     except (FileNotFoundError, AssertionError) as error:
         # this should not happen if the package is installed correctly
         # but Python has so many ways to store requirements based on how the package
@@ -125,7 +129,7 @@ def get_docker_image_from_dependency(package, dependency, owner):
             f'Failed to pinpoint the version for {dependency} as a dependency for'
             f' {package}. Will set the docker version to latest.\n{error}'
         )
-        image_id = f'ladybugtools/{dependency}:latest'
+        image_id = f'{owner}/{image_name}:latest'
 
     return image_id
 
