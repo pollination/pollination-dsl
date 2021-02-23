@@ -241,7 +241,11 @@ def task(template, needs=None, loop=None, sub_folder: str = None, sub_paths: Dic
             if tt.__decorator__ == 'dag' and tt._package == dag_package:
                 # template is another dag in the same plugin (AKA package)
                 template = f'{camel_to_snake(tt.__class__.__name__)}'
+            elif tt.__decorator__ == 'dag':
+                # template is a recipe entry point - use recipe name as the package name
+                template = tt._package["name"]
             else:
+                # it is a function from a plugin
                 template = \
                     f'{tt._package["name"]}/{camel_to_snake(tt.__class__.__name__)}'
 
