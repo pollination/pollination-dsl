@@ -76,14 +76,15 @@ def _try_pull_from_pip(package):
 
 def get_requirement_version(package_name, dependency_name):
     """Get assigned version to a dependency in package requirements."""
-    fixed_name = package_name.replace('pollination.', 'pollination_')
+    package_name = package_name.replace('pollination.', 'pollination_')
+    package_name = name_to_pollination(package_name)
     dependency_name = dependency_name.replace('_', '-')
     requirements = {}
     try:
-        req = pkg_resources.get_distribution(fixed_name).get_metadata('requires.txt')
+        req = pkg_resources.get_distribution(package_name).get_metadata('requires.txt')
     except FileNotFoundError:
         # try to get it from meta data
-        package_data = importlib_metadata.metadata(fixed_name)
+        package_data = importlib_metadata.metadata(package_name)
         req_dists = package_data.get_all('Requires-Dist') or []
         for package in req_dists:
             name, version = package.split(' (')
@@ -262,7 +263,8 @@ def _get_package_data(package_name: str) -> Dict:
 
 
 def _get_meta_data(module, package_type: str) -> MetaData:
-    qb_info = module.__pollination__
+    """Get package metadata."""
+    qb_info = dict(module.__pollination__)
     package_data = _get_package_data(module.__name__)
 
     if package_type == 'plugin':
@@ -300,10 +302,6 @@ class _BaseClass:
         raise NotImplementedError
 
     @property
-    def _outputs(self) -> NamedTuple:
-        raise NotImplementedError
-
-    @property
     def _inputs(self) -> NamedTuple:
         """Return inputs as a simple object with dot notation.
 
@@ -327,6 +325,29 @@ class _BaseClass:
         self._cached_inputs = inputs(*list(mapper.values()))
 
         return self._cached_inputs
+
+    @property
+    def _outputs(self) -> NamedTuple:
+        """Return outputs as a simple object with dot notation.
+
+        Use this property to access the outputs when creating a DAG.
+
+        The name starts with a _ not to conflict with a possible member of the class
+        with the name outputs.
+        """
+        if self._cached_outputs:
+            return self._cached_outputs
+        cls_name = camel_to_snake(self.__class__.__name__)
+        mapper = {
+            out.name.replace('-', '_'): {
+                'name': out.name.replace('-', '_'),
+                'parent': cls_name, 'value': out
+            } for out in self.queenbee.outputs
+        }
+        outputs = namedtuple('Outputs', list(mapper.keys()))
+        self._cached_outputs = outputs(*list(mapper.values()))
+
+        return self._cached_outputs
 
     @property
     def _package(self) -> dict:

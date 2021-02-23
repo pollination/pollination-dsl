@@ -77,24 +77,6 @@ class DAG(_BaseClass):
         return self._cached_queenbee
 
     @property
-    def _outputs(self) -> NamedTuple:
-        """Return dag outputs as a simple object with dot notation.
-
-        Use this property to access the outputs when creating a DAG.
-
-        The name starts with a _ not to conflict with a possible member of the class
-        with the name outputs.
-        """
-        if self._cached_outputs:
-            return self._cached_outputs
-
-        mapper = {out.name: out for out in self.queenbee.outputs}
-        outputs = namedtuple('Outputs', list(mapper.keys()))
-        self._cached_outputs = outputs(*list(mapper.values()))
-
-        return self._cached_outputs
-
-    @property
     def _dependencies(self):
         """DAG dependencies.
 
