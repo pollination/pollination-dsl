@@ -70,7 +70,6 @@ def _load_plugin(module) -> Plugin:
                 if loaded_attr is Function:
                     continue
                 functions.append(loaded_attr().queenbee)
-
     plugin = Plugin(config=config, metadata=metadata, functions=functions)
     return plugin
 
@@ -82,6 +81,7 @@ def package_recipe_dependencies(recipe: Recipe) -> None:
     it from a local python installation. If that also fails it will try to pull it
     down using pip install.
     """
+    print(f'packaging dependencies for {recipe.metadata.name}:{recipe.metadata.tag}')
     for dep in recipe.dependencies:
         package(dep.name)
 
@@ -184,7 +184,6 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
             f'Error loading {package_name}. Package must be a DSL plugin or a DSL '
             f'recipe.'
         )
-
     return package
 
 
@@ -199,7 +198,6 @@ def package(package_name: str, readme: str = None) -> None:
     repository_path = _init_repo()
     index_path = repository_path/'index.json'
     qb_obj = load(package_name, baked=False)
-
     if isinstance(qb_obj, Recipe):
         qb_type = 'recipe'
         package_recipe_dependencies(qb_obj)
@@ -215,7 +213,6 @@ def package(package_name: str, readme: str = None) -> None:
         )
     except Exception as error:
         raise ValueError(f'Failed to package {package_name} {qb_type}\n {error}')
-
     file_path = repository_path/f'{qb_type}s'/plugin_version.url
     file_object.seek(0)
     file_path.write_bytes(file_object.read())
