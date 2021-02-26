@@ -49,7 +49,7 @@ class _InputBase(BaseModel):
     def required(self):
         if self.optional:
             return False
-        elif self.default:
+        elif self.default is not None:
             return False
         else:
             return True
