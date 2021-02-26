@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Any
 from dataclasses import dataclass
+from pydantic.errors import TupleError
 from queenbee.io.inputs.function import (
     FunctionStringInput, FunctionIntegerInput, FunctionNumberInput,
     FunctionBooleanInput, FunctionFolderInput, FunctionFileInput,
@@ -25,16 +26,31 @@ _inputs_mapper = {
 
 class _InputBase(BaseModel):
 
+    annotations: Dict = None
+    description: Any = None
+    default: str = None
+    spec: Dict = None
+    optional: Any = None
+
     @property
     def __decorator__(self) -> str:
         """Queenbee decorator for inputs."""
         return 'input'
 
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        elif self.default:
+            return False
+        else:
+            return True
+
     def to_queenbee(self, name):
         """Convert this input to a Queenbee input."""
         func = _inputs_mapper[self.__class__.__name__]
         data = {
-            'required': True if self.default is None else False,
+            'required': self.required,
             'name': name.replace('_', '-'),
             'default': self.default,
             'description': self.description,
@@ -61,10 +77,7 @@ class StringInput(_InputBase):
         spec: A JSONSchema specification to validate input values.
 
     """
-    annotations: Dict = None
-    description: str = None
     default: str = None
-    spec: Dict = None
 
 
 class IntegerInput(StringInput):

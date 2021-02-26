@@ -50,6 +50,7 @@ class _OutputBase(BaseModel):
     annotations: Dict = None
     description: str = None
     alias: List[OutputAliasTypes] = None
+    optional: Any = None
 
     @validator('source')
     def change_self_to_inputs(cls, v):
@@ -69,11 +70,19 @@ class _OutputBase(BaseModel):
         """Queenbee decorator for outputs."""
         return 'output'
 
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        else:
+            return True
+
     def to_queenbee(self, name):
         """Convert this output to a Queenbee DAG output."""
         func = _outputs_mapper[self.__class__.__name__]
         data = {
             'name': name.replace('_', '-'),
+            'required': self.required,
             'from': _get_from(self.source, self.reference_type),
             'description': self.description,
             'annotations': self.annotations,
