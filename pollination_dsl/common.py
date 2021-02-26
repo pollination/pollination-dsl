@@ -48,15 +48,21 @@ def import_module(name: str, pull=True):
     try:
         namespace = __import__(f'{_namespace}.{_name}')
         module = getattr(namespace, _name)
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as e:
+        if not str(e).endswith(f"'{_namespace}.{_name}'"):
+            # it is a module import error but not the one that we are trying to import
+            raise ModuleNotFoundError(e)
+
         if pull:
             print(err_msg)
             success = _try_pull_from_pip(package=package_name)
             if success:
                 # try again
-                return import_module(package_name)
+                return import_module(package_name, pull=False)
         raise ModuleNotFoundError(
-            f'Failed to import \'{package_name}\' locally or from PyPI.'
+            f'Failed to import \'{package_name}\' locally or from PyPI. '
+            f'You can try `pip install {package_name}` manually.\nTo ensure '
+            f'{package_name} is installed try to run `pip show {package_name}`'
         )
 
     return module
@@ -359,7 +365,7 @@ class _BaseClass:
         if self._cached_package:
             return self._cached_package
 
-        module = import_module(self._python_package)
+        module = import_module(self._python_package, pull=True)
         assert hasattr(module, '__pollination__'), \
             'Failed to find __pollination__ info in __init__.py'
         package_data = _get_package_data(module.__name__)
