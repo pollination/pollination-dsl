@@ -34,6 +34,7 @@ class _InputBase(BaseModel):
     default: Any = None
     spec: Dict = None
     alias: List[InputAliasTypes] = None
+    optional: Any = None
 
     @validator('alias', always=True)
     def empty_list_alias(cls, v):
@@ -44,11 +45,20 @@ class _InputBase(BaseModel):
         """Queenbee decorator for inputs."""
         return 'input'
 
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        elif self.default:
+            return False
+        else:
+            return True
+
     def to_queenbee(self, name):
         """Convert this input to a Queenbee input."""
         func = _inputs_mapper[self.__class__.__name__]
         data = {
-            'required': True if self.default is None else False,
+            'required': self.required,
             'name': name.replace('_', '-'),
             'default': self.default,
             'description': self.description,

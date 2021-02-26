@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 from dataclasses import dataclass
 from queenbee.io.outputs.function import (
     FunctionStringOutput, FunctionIntegerOutput, FunctionNumberOutput,
@@ -29,16 +29,38 @@ _outputs_mapper = {
 
 class _OutputBase(BaseModel):
 
+    path: str
+    annotations: Dict = None
+    description: str = None
+    optional: Any = None
+
+    @validator('path')
+    def change_self_to_inputs(cls, v):
+        refs = parse_double_quotes_vars(v)
+        for ref in refs:
+            v = v.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return v
+
     @property
     def __decorator__(self) -> str:
         """Queenbee decorator for outputs."""
         return 'output'
+
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        else:
+            return True
 
     def to_queenbee(self, name):
         """Convert this output to a Queenbee output."""
         func = _outputs_mapper[self.__class__.__name__]
         data = {
             'name': name.replace('_', '-'),
+            'required': self.required,
             'path': self.path,
             'description': self.description,
             'annotations': self.annotations
@@ -67,18 +89,7 @@ class StringOutput(_OutputBase):
         path: Path to the source file for this output.
 
     """
-    path: str
-    annotations: Dict = None
-    description: str = None
-
-    @validator('path')
-    def change_self_to_inputs(cls, v):
-        refs = parse_double_quotes_vars(v)
-        for ref in refs:
-            v = v.replace(
-                ref, ref.replace('self.', 'inputs.').replace('_', '-')
-            )
-        return v
+    ...
 
 
 class IntegerOutput(StringOutput):
