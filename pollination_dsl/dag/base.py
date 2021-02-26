@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import NamedTuple
 import inspect
-from collections import namedtuple
 
 from queenbee.recipe.dag import DAG as QBDAG
 

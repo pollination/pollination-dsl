@@ -4,8 +4,7 @@ import subprocess
 import tempfile
 
 from dataclasses import dataclass
-from typing import Any, Dict, NamedTuple
-from collections import namedtuple
+from typing import Any, Dict
 
 from queenbee.plugin.function import Function as QBFunction
 from queenbee.base.parser import parse_double_quotes_vars
