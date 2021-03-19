@@ -49,22 +49,33 @@ class _OutputAliasBase(BaseModel):
     name: str = Field(...)
     annotations: Dict = None
     description: str = None
+    optional: bool = False
+
     platform: List[str] = Field(
         ...,
         description='Name of the client platform (e.g. Grasshopper, Revit, etc). The '
         'value can be any strings as long as it has been agreed between client-side '
         'developer and author of the recipe.'
     )
+
     handler: List[IOAliasHandler] = Field(
         ...,
         description='List of process actions to process the input or output value.'
     )
+
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        else:
+            return True
 
     def to_queenbee(self):
         """Convert this output to a Queenbee DAG output."""
         func = _outputs_mapper[self.__class__.__name__]
         data = {
             'name': self.name,
+            'required': self.required,
             'description': self.description,
             'annotations': self.annotations,
             'platform': self.platform,

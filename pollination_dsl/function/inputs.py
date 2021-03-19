@@ -30,7 +30,7 @@ class _InputBase(BaseModel):
     description: Any = None
     default: str = None
     spec: Dict = None
-    optional: Any = None
+    optional: bool = False
 
     @property
     def __decorator__(self) -> str:

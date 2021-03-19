@@ -50,7 +50,7 @@ class _OutputBase(BaseModel):
     annotations: Dict = None
     description: str = None
     alias: List[OutputAliasTypes] = None
-    optional: Any = None
+    optional: bool = False
 
     @validator('source')
     def change_self_to_inputs(cls, v):

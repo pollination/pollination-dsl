@@ -32,6 +32,7 @@ class _InputAliasBase(BaseModel):
     description: str = None
     default: Any = None
     spec: Dict = None
+    optional: bool = False
     platform: List[str] = Field(
         ...,
         description='Name of the client platform (e.g. Grasshopper, Revit, etc). The '
@@ -43,11 +44,20 @@ class _InputAliasBase(BaseModel):
         description='List of process actions to process the input or output value.'
     )
 
+    @property
+    def required(self):
+        if self.optional:
+            return False
+        elif self.default is not None:
+            return False
+        else:
+            return True
+
     def to_queenbee(self):
         """Convert this input to a Queenbee input alias."""
         func = _inputs_mapper[self.__class__.__name__]
         data = {
-            'required': True if self.default is None else False,
+            'required': self.required,
             'name': self.name,
             'default': self.default,
             'description': self.description,

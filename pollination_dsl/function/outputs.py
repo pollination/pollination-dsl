@@ -32,7 +32,7 @@ class _OutputBase(BaseModel):
     path: str
     annotations: Dict = None
     description: str = None
-    optional: Any = None
+    optional: bool = False
 
     @validator('path')
     def change_self_to_inputs(cls, v):
