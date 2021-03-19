@@ -34,7 +34,7 @@ class _InputBase(BaseModel):
     default: Any = None
     spec: Dict = None
     alias: List[InputAliasTypes] = None
-    optional: Any = None
+    optional: bool = False
 
     @validator('alias', always=True)
     def empty_list_alias(cls, v):
