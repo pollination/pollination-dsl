@@ -1,5 +1,5 @@
 pytest==6.2.2
-Sphinx==3.5.2
+Sphinx==3.5.3
 sphinx-bootstrap-theme==0.7.1
 sphinxcontrib-fulltoc==1.2.0
 sphinxcontrib-websupport==1.2.4
