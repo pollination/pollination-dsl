@@ -4,7 +4,7 @@ from queenbee.io.inputs.alias import DAGGenericInputAlias, DAGStringInputAlias, 
     DAGIntegerInputAlias, DAGNumberInputAlias, DAGBooleanInputAlias, \
     DAGJSONObjectInputAlias, DAGArrayInputAlias, DAGFileInputAlias, \
     DAGFolderInputAlias, DAGPathInputAlias, DAGLinkedInputAlias
-from queenbee.base.basemodel import BaseModel, Field
+from queenbee.base.basemodel import BaseModel, Field, validator
 from queenbee.io.common import ItemType, IOAliasHandler
 
 
@@ -39,10 +39,15 @@ class _InputAliasBase(BaseModel):
         'value can be any strings as long as it has been agreed between client-side '
         'developer and author of the recipe.'
     )
+
     handler: List[IOAliasHandler] = Field(
-        ...,
+        None,
         description='List of process actions to process the input or output value.'
     )
+
+    @validator('handler', always=True)
+    def create_empty_list(cls, v):
+        return [] if v is None else v
 
     @property
     def required(self):

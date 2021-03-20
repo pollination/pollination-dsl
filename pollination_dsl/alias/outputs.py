@@ -8,7 +8,7 @@ from queenbee.io.outputs.alias import (
     DAGFileOutputAlias, DAGPathOutputAlias, DAGJSONObjectOutputAlias,
     DAGArrayOutputAlias, DAGLinkedOutputAlias
 )
-from queenbee.base.basemodel import BaseModel
+from queenbee.base.basemodel import BaseModel, validator
 from queenbee.io.common import ItemType, IOAliasHandler
 
 from pydantic import Field
@@ -59,9 +59,13 @@ class _OutputAliasBase(BaseModel):
     )
 
     handler: List[IOAliasHandler] = Field(
-        ...,
+        None,
         description='List of process actions to process the input or output value.'
     )
+
+    @validator('handler', always=True)
+    def create_empty_list(cls, v):
+        return [] if v is None else v
 
     @property
     def required(self):
