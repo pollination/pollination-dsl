@@ -253,19 +253,10 @@ def run(ctx, recipe_name, project_folder, inputs, workers, env, name, force, deb
 
     recipe_folder = target_folder / recipe_name
 
-    if name and force:
-        run_folder = pathlib.Path(project_folder, name)
-        if run_folder.exists():
-            print(
-                'A previous run with the same name already exist. '
-                'Removing the previous run...'
-            )
-            shutil.rmtree(run_folder.as_posix(), ignore_errors=True)
-
     # run the recipe using queenbee-local
     ctx.invoke(
         run_recipe, recipe=recipe_folder, project_folder=project_folder, inputs=inputs,
-        workers=workers, env=env, name=name, debug=debug
+        workers=workers, env=env, name=name, debug=debug, force=force
     )
 
 
