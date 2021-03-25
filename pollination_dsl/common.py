@@ -49,7 +49,7 @@ def import_module(name: str, pull=True):
         namespace = __import__(f'{_namespace}.{_name}')
         module = getattr(namespace, _name)
     except ModuleNotFoundError as e:
-        if not str(e).endswith(f"'{_namespace}.{_name}'"):
+        if not str(e).endswith(f"'{_namespace}.{_name}'".replace('-', '_')):
             # it is a module import error but not the one that we are trying to import
             raise ModuleNotFoundError(e)
 
