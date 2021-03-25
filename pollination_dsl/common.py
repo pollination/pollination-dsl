@@ -226,19 +226,18 @@ def _get_package_maintainers(package_data: Dict) -> List[Dict]:
     return package_maintainers
 
 
-def _get_package_version(package_data: Dict) -> str:
-    """Get package version.
-
-    This function returns the non-development version for a development version.
-    It removes the .dev part and return x.y.z-1 version if it is a dev version.
-    """
-    version = package_data.get('Version')
+def _clean_version(version: str) -> str:
     xyz = version.split('.')
-    if len(xyz) <= 3:
-        return version
-    # clean up the developer version
+
+    if len(xyz) == 2:
+        return f'{xyz[0]}.{xyz[1]}.0'
+
     x, y, z = xyz[:3]
 
+    if z == '0':
+        return f'{x}.{y}.{z}'
+
+    # clean up the developer version
     try:
         version = f'{x}.{y}.{int(z) - 1}'
     except ValueError:
@@ -246,6 +245,16 @@ def _get_package_version(package_data: Dict) -> str:
         version = f'{x}.{y}.0'
 
     return version
+
+
+def _get_package_version(package_data: Dict) -> str:
+    """Get package version.
+
+    This function returns the non-development version for a development version.
+    It removes the .dev part and return x.y.z-1 version if it is a dev version.
+    """
+    version = package_data.get('Version')
+    return _clean_version(version)
 
 
 def _get_package_data(package_name: str) -> Dict:
