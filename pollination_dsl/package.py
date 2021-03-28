@@ -173,9 +173,9 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
                 tag = get_requirement_version(package_name, name)
             except AssertionError:
                 warnings.warn(
-                    f'{package_name} has dependencies on {name} but it is not set as one '
-                    'of the package dependencies in setup.py. Will use the version of the '
-                    'currently installed version instead.'
+                    f'{package_name} has dependencies on {name} but it is not set as '
+                    'one of the package dependencies in setup.py. Will use the version '
+                    f'of the currently installed version: {name}:{dep.tag}'
                 )
             else:
                 dep.tag = tag
