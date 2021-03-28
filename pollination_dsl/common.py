@@ -227,7 +227,8 @@ def _get_package_maintainers(package_data: Dict) -> List[Dict]:
 
 
 def _clean_version(version: str) -> str:
-    xyz = version.split('.')
+    """Clean package version."""
+    xyz = [v.strip() for v in version.split('.')]
 
     if len(xyz) == 2:
         return f'{xyz[0]}.{xyz[1]}.0'
@@ -239,7 +240,7 @@ def _clean_version(version: str) -> str:
 
     # clean up the developer version
     try:
-        version = f'{x}.{y}.{int(z) - 1}'
+        version = f'{x}.{y}.{int(z)}'
     except ValueError:
         # development version like 0.1.dev1+gf910655.d20210207
         version = f'{x}.{y}.0'
@@ -297,7 +298,6 @@ def _get_meta_data(module, package_type: str) -> MetaData:
         qb_info[k] = v
 
     metadata = MetaData.parse_obj(qb_info)
-
     return metadata
 
 
