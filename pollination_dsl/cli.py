@@ -118,8 +118,12 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
     '--dry-run', '-dr', help='An option to test the command and export the package to '
     'a folder without pushing it to endpoint.', is_flag=True, default=False
 )
+@click.option(
+    '--push-dependencies', '-pd', help='An option to push any dependencies the package '
+    'might have to the same endpoint.', is_flag=True, default=False
+)
 @click.pass_context
-def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
+def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run, push_dependencies):
     """Push a pollination dsl recipe or plugin to Pollination.
 
     To run this command you need queenbee-pollination[cli] installed. You can also
@@ -154,6 +158,15 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run):
     else:
         cmd = recipe
         resource_type = 'recipe'
+
+    if resource_type == 'recipe' and push_dependencies:
+        # recuresively push dependencies 
+        for dependency in resource.dependencies:
+            ctx.invoke(
+                push_resource,
+                package_name=dependency.name, endpoint=endpoint, source=source,
+                dry_run=dry_run, push_dependencies=True,
+            )
 
     sub_folder = package_name.replace('_', '-').replace('pollination-', '')
 
