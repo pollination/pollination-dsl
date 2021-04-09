@@ -158,7 +158,10 @@ write(python_package, './pollination-honeybee-radiance')
 
 ```
 
-See [`pollination-honeybee-radiance` plugin](https://github.com/pollination/pollination-honeybee-radiance) for a full project example.
+Here are two real world examples of Pollination plugins:
+
+- [`pollination-honeybee-radiance` plugin](https://github.com/pollination/honeybee-radiance)
+- [`pollination-honeybee-energy` plugin](https://github.com/pollination/honeybee-energy)
 
 ## Recipe
 
@@ -182,7 +185,11 @@ translate(python_package, './daylight-factor')
 
 ```
 
-See [`daylight factor` recipe](https://github.com/pollination/ladybug-tools-recipes/tree/master/recipes/daylight-factor) for a full project example.
+Here are number of real world examples of Pollination recipes:
+
+- [`Annual energy use` recipe](https://github.com/pollination/annual-energy-use)
+- [`Daylight factor` recipe](https://github.com/pollination/daylight-factor)
+- [`Annual daylight` recipe](https://github.com/pollination/annual-daylight)
 
 
 # How to create a pollination-dsl package
@@ -197,36 +204,30 @@ we keep all the packages under the `pollination` namespace.
 
 ## setup.py
 
+Here is an example `setup.py` file. You can see the latest version of the file [here](https://github.com/pollination/honeybee-radiance/blob/master/setup.py).
+
 ```python
 
 #!/usr/bin/env python
 import setuptools
 
-# These two class extends setup.py to install the packages as pollination packages
-try:
-    from pollination_dsl.package import PostInstall, PostDevelop
-    cmd_class = {'develop': PostDevelop, 'install': PostInstall}
-except ModuleNotFoundError:
-    # this will happen the very first time when pollination_dsl is not installed
-    # to avoid this issue use pip install pollination_dsl first before installing
-    # pollination packages
-    cmd_class = {}
-
-# Read me will be mapped to readme strings
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setuptools.setup(
-    cmdclass=cmd_class,                                                     # required - include this for pollination packaging
     name='pollination-honeybee-radiance',                                   # required - will be used for package name
-    packages=setuptools.find_namespace_packages(include=['pollination.*']), # required - that's how pollination find the package
     author='ladybug-tools',                                                 # required - author must match the owner account name on Pollination
+    author_email='info@ladybug.tools',
+    packages=setuptools.find_namespace_packages(include=['pollination.*']), # required - that's how pollination find the package
     version='0.1.0',                                                        # required - will be used as package tag. you can also use semantic versioning
-    zip_safe=False,                                                         # required - set to False to ensure the packaging will always work
-    project_urls={
-        'icon': 'https://ladybug.tools/assets/icon.png',                    # optional but strongly encouraged - link to package icon
-    },
+    install_requires=requirements,
     url='https://github.com/pollination/pollination-honeybee-radiance',     # optional - will be translated to home
+    project_urls={
+        'icon': 'https://raw.githubusercontent.com/ladybug-tools/artwork/master/icons_bugs/grasshopper_tabs/HB-Radiance.png',                    # optional but strongly encouraged - link to package icon
+    },
     description='Honeybee Radiance plugin for Pollination.',                # optional - will be used as package description
     long_description=long_description,                                      # optional - will be translated to ReadMe content on Pollination
     long_description_content_type="text/markdown",
@@ -234,33 +235,47 @@ setuptools.setup(
     maintainer_email='maintainer_1@example.come, maintainer_2@example.com', # use comma inside the string.
     keywords='honeybee, radiance, ladybug-tools, daylight',                 # optional - will be used as keywords
     license='PolyForm Shield License 1.0.0, https://polyformproject.org/wp-content/uploads/2020/06/PolyForm-Shield-1.0.0.txt',  # optional - the license link should be separated by a comma
+    zip_safe=False                                                         # required - set to False to ensure the packaging will always work
 )
 
 ```
 
 ## __init__.py
 
-Here is an example `__init__.py` for a plugin.
+Here is an example `__init__.py` for a plugin. The latest version of the file is
+accessible [here](https://github.com/pollination/honeybee-radiance/blob/master/pollination/honeybee_radiance/__init__.py).
+
 
 ```python
 
+"""Honeybee Radiance plugin for Pollination."""
+from pollination_dsl.common import get_docker_image_from_dependency
+
+# set the version for docker image dynamically based on honeybee-radiance version
+# in dependencies
+image_id = get_docker_image_from_dependency(
+    __package__, 'honeybee-radiance', 'ladybugtools'
+)
+
 __pollination__ = {
-    'config': {                   # required for Pollination - docker information for this specific plugin
+    'app_version': '5.4',  # optional - tag for version of Radiance
+    'config': {
         'docker': {
-            'image': 'ladybugtools/honeybee-radiance:1.28.12',
+            'image': image_id,
             'workdir': '/home/ladybugbot/run'
         }
     }
 }
 ```
 
-Here is an example `__init__.py` for a recipe.
+Here is an example `__init__.py` for a recipe. The latest version of the file is
+accessible [here](https://github.com/pollination/annual-daylight/blob/master/pollination/annual_daylight/__init__.py).
 
 ```python
 from .entry import AnnualDaylightEntryPoint
 
 __pollination__ = {
-    'entry_point': AnnualDaylightEntryPoint,  # required - this will point pollination to the class that should be used to start the run
+    'entry_point': AnnualDaylightEntryPoint
 }
 
 ```
