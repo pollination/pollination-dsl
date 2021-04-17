@@ -292,7 +292,7 @@ class Outputs:
     path = PathOutputAlias
     dict = DictOutputAlias
     list = ListOutputAlias
-    link = LinkedOutputAlias
+    linked = LinkedOutputAlias
 
 
 OutputAliasTypes = Union[
