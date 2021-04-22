@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import shutil
+import traceback
 
 import click
 from click.exceptions import ClickException
@@ -84,6 +85,7 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
             recipe_folder = rep.write(target_folder=target_folder)
         except Exception as e:
             print(f'Failed to translate the recipe:\n{e}', file=sys.stderr)
+            traceback.print_exc()
             return sys.exit(1)
         else:
             print(f'Success: {recipe_folder}', file=sys.stderr)
