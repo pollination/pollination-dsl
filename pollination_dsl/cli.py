@@ -125,7 +125,9 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
     'might have to the same endpoint.', is_flag=True, default=False
 )
 @click.pass_context
-def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run, push_dependencies):
+def push_resource(
+    ctx, package_name, endpoint, source, public, tag, dry_run, push_dependencies
+        ):
     """Push a pollination dsl recipe or plugin to Pollination.
 
     To run this command you need queenbee-pollination[cli] installed. You can also
@@ -162,7 +164,7 @@ def push_resource(ctx, package_name, endpoint, source, public, tag, dry_run, pus
         resource_type = 'recipe'
 
     if resource_type == 'recipe' and push_dependencies:
-        # recuresively push dependencies 
+        # recursively push dependencies
         for dependency in resource.dependencies:
             ctx.invoke(
                 push_resource,
