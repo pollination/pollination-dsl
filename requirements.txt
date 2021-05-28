@@ -1,4 +1,3 @@
 queenbee-pollination==0.7.4
 queenbee-local>=0.3.14
 importlib-metadata>=4.3.0
-requests>=2.25.1
