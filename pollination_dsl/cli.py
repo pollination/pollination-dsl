@@ -3,13 +3,15 @@ import pathlib
 import os
 import sys
 import tempfile
-import shutil
+import io
+from zipfile import ZipFile
 import traceback
 
 import click
 from click.exceptions import ClickException
 from queenbee.cli.context import Context as QueenbeeContext
 from queenbee.plugin.plugin import Plugin
+import requests
 import yaml
 
 from queenbee_pollination.cli.push import recipe, plugin
@@ -71,27 +73,43 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
         return sys.exit(0)
 
     else:
+        recipe = load(recipe_name, baked=True)
         try:
             from queenbee_luigi.recipe import Recipe
         except ImportError:
-            raise ClickException(
-                'Failed to find queenbee-luigi. To translate a recipe to luigi pipeline '
-                'you must have queenbee-luigi installed.'
-            )
-
-        recipe = load(recipe_name, baked=True)
-        try:
-            rep = Recipe(recipe)
-            recipe_folder = rep.write(target_folder=target_folder)
-        except Exception as e:
-            print(f'Failed to translate the recipe:\n{e}', file=sys.stderr)
-            traceback.print_exc()
-            return sys.exit(1)
+            # try pollination endpoint
+            url = 'https://utilities.pollination.cloud/to-luigi-archive'
+            token = os.getenv('QB_POLLINATION_TOKEN')
+            assert token is not None, \
+                'Pollination token is not set. Use QB_POLLINATION_TOKEN to set it as ' \
+                'an environmental variable. You can generate the token from your ' \
+                'Pollination profile page under settings.'
+            headers = {'x-pollination-token': token}
+            response = requests.post(url, json=recipe.to_dict(), headers=headers)
+            if response.status_code != 200:
+                raise ClickException(
+                    'Failed to translate the recipe:\n'
+                    f'{response.content.decode("utf-8")}'
+                )
+            bytestream = io.BytesIO(response.content)
+            name = recipe_name.replace('-', '_').replace('pollination_', '')
+            project_folder = os.path.join(target_folder, name)
+            with ZipFile(bytestream) as zf:
+                zf.extractall(project_folder)
         else:
-            print(f'Success: {recipe_folder}', file=sys.stderr)
-            if no_exit:
-                return
-            return sys.exit(0)
+            # use local queenbee luigi
+            try:
+                rep = Recipe(recipe)
+                recipe_folder = rep.write(target_folder=target_folder)
+            except Exception as e:
+                print(f'Failed to translate the recipe:\n{e}', file=sys.stderr)
+                traceback.print_exc()
+                return sys.exit(1)
+            else:
+                print(f'Success: {recipe_folder}', file=sys.stderr)
+                if no_exit:
+                    return
+                return sys.exit(0)
 
 
 @dsl.command('push')
