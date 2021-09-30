@@ -28,7 +28,7 @@ jobs:
           npm install @semantic-release/exec
       - name: run semantic release
         run:
-          npx semantic-release
+          npx semantic-release@^17.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYPI_USERNAME: ${{ secrets.POLLINATION_PYPI_USERNAME }}
