@@ -88,6 +88,8 @@ def get_requirement_version(package_name, dependency_name):
     requirements = {}
     try:
         req = pkg_resources.get_distribution(package_name).get_metadata('requires.txt')
+        # remove extras if any
+        req = '\n'.join(r for r in req.split() if not r.strip().startswith('['))
     except FileNotFoundError:
         # try to get it from meta data
         package_data = importlib_metadata.metadata(package_name)
