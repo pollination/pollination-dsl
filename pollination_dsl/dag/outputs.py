@@ -34,6 +34,7 @@ def _get_from(value, reference):
     try:
         # only TaskReference has parent
         parent = value['parent']
+        reference = 'TaskReference'
     except TypeError:
         # value
         return {'type': reference, 'path': value}
@@ -54,6 +55,8 @@ class _OutputBase(BaseModel):
 
     @validator('source')
     def change_self_to_inputs(cls, v):
+        if isinstance(v, dict):
+            return v
         refs = parse_double_quotes_vars(v)
         for ref in refs:
             v = v.replace(
@@ -100,7 +103,10 @@ class _OutputBase(BaseModel):
 
     @property
     def reference_type(self):
-        return 'TaskReference'
+        # Set the default to File
+        # If it is TaskReference it will be set in _get_from
+        # Otherwise it will be re-written in subclass
+        return 'FileReference'
 
 
 class GenericOutput(_OutputBase):
@@ -135,6 +141,8 @@ class StringOutput(GenericOutput):
 
     @validator('source')
     def change_self_to_inputs(cls, v):
+        if isinstance(v, dict):
+            return v
         refs = parse_double_quotes_vars(v)
         for ref in refs:
             v = v.replace(
