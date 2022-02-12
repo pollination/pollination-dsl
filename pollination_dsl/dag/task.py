@@ -110,6 +110,9 @@ def _get_task_arguments(func, inputs_info, sub_paths) -> List[TaskArguments]:
                 arg = TaskPathArgument.parse_obj(arg_dict)
             else:
                 # parameter
+                # an extra check to reformat type to TaskReference for DAGTaskLoop
+                if arg_dict['from']['type'] == 'TaskFileReference':
+                    arg_dict['from']['type'] = 'TaskReference'
                 arg = TaskArgument.parse_obj(arg_dict)
         else:
             # value reference
@@ -150,6 +153,9 @@ def _get_task_loop(value, inputs_info) -> DAGTaskLoop:
     if not value:
         return None
     from_ = _get_from(value, inputs_info)
+    # an extra check to reformat type to TaskReference for DAGTaskLoop
+    if from_['type'] == 'TaskFileReference':
+        from_['type'] = 'TaskReference'
     return DAGTaskLoop.parse_obj({'from': from_})
 
 
@@ -167,6 +173,7 @@ def _get_task_returns(func) -> NamedTuple:
     #       {'from': SplitGrid()._outputs.output_folder, 'to': 'sub_grids'}
     #  ]
     matches = [match.replace('}', '') for match in re.findall(pattern, src)]
+
     mapper = {
         match: {
             'name': match.replace('_', '-'),
@@ -269,7 +276,7 @@ def task(template, needs=None, loop=None, sub_folder: str = None, sub_paths: Dic
                 to_ = out.get('to', None)
                 description = out.get('description', None)
                 if from_.is_artifact:
-                    assert to_ is not None, 'Missing \'to\' key for {from_.name}. ' \
+                    assert to_ is not None, f'Missing \'to\' key for {from_.name}. ' \
                         'All file and folder returns must provide a target path using ' \
                         'the `to` key.'
                     if to_:
