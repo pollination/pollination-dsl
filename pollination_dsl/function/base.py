@@ -153,6 +153,12 @@ def command(func):
             command = command.replace(
                 ref, ref.replace('self.', 'inputs.').replace('_', '-')
             )
+            # add additional check in case self in the refrence has been already replaced
+            # by inputs because of a reference with a similar but shorter name.
+            command = command.replace(
+                ref.replace('self.', 'inputs.'),
+                ref.replace('self.', 'inputs.').replace('_', '-')
+            )
         return command
 
     func.__decorator__ = 'command'
