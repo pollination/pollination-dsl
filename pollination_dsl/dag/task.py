@@ -165,7 +165,7 @@ def _get_task_returns(func) -> NamedTuple:
     pattern = r'[\'\"]from[\'\"]\s*:\s*.*\._outputs\.(\S*)\s*[,}]'
     parent = func.__name__.replace('_', '-')
     src = inspect.getsource(func)
-    # remove the last } which happens in case of parameters input. Somene who
+    # remove the last } which happens in case of parameters input. Someone who
     # knows regex better than I do should be able to fix this by changing the pattern
     # here is an example to recreate the issue.
     #   return [

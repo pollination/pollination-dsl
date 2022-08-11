@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 import inspect
+import warnings
 
 from queenbee.recipe.dag import DAG as QBDAG
-
+from queenbee.recipe.recipe import TemplateFunction
 from ..common import _BaseClass
 
 
@@ -111,3 +112,37 @@ class DAG(_BaseClass):
                         dependencies[key].append(v)
 
         return dependencies
+
+
+
+@dataclass
+class GroupedDAG(DAG):
+    """A grouped DAG is a special DAG that will be executed on the same Pod.
+
+    Grouped DAG is useful to group similar small tasks together to run them faster.
+    Unlike the default DAG, the tasks in group DAG cannot have a for loop.
+    """
+
+    @property
+    def queenbee(self) -> QBDAG:
+        dag = super().queenbee
+        dag.annotations['__is_grouped__'] = True
+        if len(dag.tasks) == 1:
+            warnings.warn(
+                'A grouped DAG usually has more than one task. Consider using a '
+                f'standard DAG for "{dag.name}"'
+            )
+        for task in dag.tasks:
+            if task.loop:
+                raise ValueError(
+                    f'Found a loop object in Task "{task.name}" in GroupedDAG '
+                    f'{dag.name}. Either remove the for loop or use a standard DAG.'
+                )
+
+            # We can technically support this but I'm keeping it simple for now
+            assert not task.parameter_returns, \
+                f'Found an invalid task "{task.name}" with parameter output in ' \
+                f'GroupedDAG "{dag.name}". Only file or folder outputs are allowed in ' \
+                f'GroupedDAG.\n{task.parameter_returns}'
+
+        return dag
