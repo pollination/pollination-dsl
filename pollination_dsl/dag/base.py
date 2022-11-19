@@ -144,5 +144,8 @@ class GroupedDAG(DAG):
                 f'Found an invalid task "{task.name}" with parameter output in ' \
                 f'GroupedDAG "{dag.name}". Only file or folder outputs are allowed in ' \
                 f'GroupedDAG.\n{task.parameter_returns}'
+            is_main = task.annotations.get('main_task', False)
+            if is_main:
+                dag.annotations['__main_task__'] = task.name
 
         return dag
