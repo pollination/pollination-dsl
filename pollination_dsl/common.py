@@ -106,6 +106,12 @@ def get_requirement_version(package_name, dependency_name):
                 str(package.specifier).replace('=', '').replace('>', '').replace('<', '')
             requirements[package.project_name] = version
 
+    # catch the case of using [] in name e.g. honeybee-display[full]
+    requirements = {
+        package.split('[')[0].strip(): version
+        for package, version in requirements.items()
+    }
+
     assert dependency_name in requirements, \
         f'{dependency_name} is not a requirement for {package_name}.'
 
