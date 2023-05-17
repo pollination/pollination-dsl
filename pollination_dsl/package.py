@@ -179,6 +179,13 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
                 )
             else:
                 dep.tag = tag
+
+            # tag might return additional information for extra dependencies
+            # here is an example: "0.1.11 ; extra  'viz'"
+            # we try to clean up the tag from the extra tag
+            if dep.tag:
+                dep.tag = dep.tag.split('; extra')[0].strip()
+
     else:
         raise ValueError(
             f'Error loading {package_name}. Package must be a DSL plugin or a DSL '
