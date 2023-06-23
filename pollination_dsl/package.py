@@ -61,7 +61,7 @@ def _load_plugin(module) -> Plugin:
     folder = pathlib.Path(module.__file__).parent
 
     functions = []
-    for (_, name, _) in pkgutil.iter_modules([folder]):
+    for (_, name, _) in pkgutil.iter_modules([folder.as_posix()]):
         module = importlib.import_module('.' + name, package_name)
         for attr in dir(module):
             loaded_attr = getattr(module, attr)
