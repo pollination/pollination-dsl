@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from queenbee.plugin.function import Function as QBFunction
+
 from queenbee.base.parser import parse_double_quotes_vars
 from queenbee_local import _copy_artifacts
 
@@ -45,13 +46,16 @@ class Function(_BaseClass):
         inputs = []
         outputs = []
 
+        script = ''
+        command = ''
         for method_name, method in inspect.getmembers(cls):
             # try to get decorator
             qb_dec = getattr(method, '__decorator__', None)
             if qb_dec is None:
                 continue
-            if qb_dec == 'command':
-                # TODO: improve find and replace
+            if qb_dec == 'script':
+                script = method.parse_script(method(cls))
+            elif qb_dec == 'command':
                 command = method.parse_command(method(cls))
             elif qb_dec == 'input':
                 inputs.append(method.to_queenbee(name=method_name))
@@ -60,10 +64,27 @@ class Function(_BaseClass):
             else:
                 raise ValueError(f'Unsupported __decorator__: {qb_dec}')
 
-        self._cached_queenbee = QBFunction(
-            name=name, description=description, inputs=inputs, command=command,
-            outputs=outputs
-        )
+        if not outputs:
+            raise ValueError(
+                f'Invalid Function: "{cls.__name__}". '
+                'A Function should at least have one output.'
+            )
+
+        if script:
+            self._cached_queenbee = QBFunction(
+                name=name, description=description, inputs=inputs, source=script,
+                outputs=outputs
+            )
+        elif command:
+            self._cached_queenbee = QBFunction(
+                name=name, description=description, inputs=inputs, command=command,
+                outputs=outputs
+            )
+        else:
+            raise ValueError(
+                f'Invalid Function: "{cls.__name__}". '
+                'A Function must either have a `script` or a `command`.'
+            )
 
         return self._cached_queenbee
 
@@ -153,8 +174,8 @@ def command(func):
             command = command.replace(
                 ref, ref.replace('self.', 'inputs.').replace('_', '-')
             )
-            # add additional check in case self in the refrence has been already replaced
-            # by inputs because of a reference with a similar but shorter name.
+            # add additional check in case self in the reference has been already
+            # replaced by inputs because of a reference with a similar but shorter name.
             command = command.replace(
                 ref.replace('self.', 'inputs.'),
                 ref.replace('self.', 'inputs.').replace('_', '-')
@@ -163,4 +184,48 @@ def command(func):
 
     func.__decorator__ = 'command'
     func.parse_command = _clean_command
+    return func
+
+
+def script(func):
+    """Script decorator for a script.
+
+    A method that is decorated by a script must return a string. Use ``{{}}`` to
+    template the script with script arguments (e.g. {{self.name}}).
+
+    """
+
+    def _clean_script(script: str) -> str:
+        """A helper function to reformat python script to Queenbee function scripts."""
+        lines = iter(script.splitlines(keepends=True))
+        for line in lines:
+            segments = line.split()
+            if len(segments) > 2 and segments[0] == 'if' and segments[1] == '__name__':
+                # join all the lines in this code-block
+                lines = [ll[4:] for ll in lines]
+                script = ''.join(lines)
+                break
+        else:
+            # script is directly written in the function.
+            lines = [
+                ll[8:] if line.startswith('    ') else ll
+                for ll in script.splitlines(keepends=True)
+            ]
+            script = ''.join(lines)
+
+        refs = parse_double_quotes_vars(script)
+        for ref in refs:
+            script = script.replace(
+                ref, ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+            # add additional check in case self in the reference has been already
+            # replaced by inputs because of a reference with a similar but shorter name.
+            script = script.replace(
+                ref.replace('self.', 'inputs.'),
+                ref.replace('self.', 'inputs.').replace('_', '-')
+            )
+        return script
+
+    func.__decorator__ = 'script'
+    func.parse_script = _clean_script
     return func
