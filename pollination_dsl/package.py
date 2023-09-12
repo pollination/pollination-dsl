@@ -178,7 +178,8 @@ def load(package_name: str, baked: bool = False) -> Union[Plugin, BakedRecipe, R
                     f'of the currently installed version: {name}:{dep.tag}'
                 )
             else:
-                dep.tag = tag
+                if tag:
+                    dep.tag = tag
 
             # tag might return additional information for extra dependencies
             # here is an example: "0.1.11 ; extra  'viz'"
