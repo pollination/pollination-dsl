@@ -23,6 +23,7 @@ setuptools.setup(
     entry_points={"console_scripts": ["pollination = pollination_dsl.cli:main"]},
     classifiers=[
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Operating System :: OS Independent"
     ],
