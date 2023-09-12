@@ -99,8 +99,8 @@ def get_requirement_version(package_name, dependency_name):
                 name, version = package.split(' (')
             except ValueError as e:
                 print(
-                    f'Failed to parse the dependency version for {name} from {package}. '
-                    f'The version will not be set:\n{str(e)}'
+                    f'Failed to parse the dependency version for {package_name} '
+                    f'from {package}. The version will not be set:\n{str(e)}'
                 )
                 requirements[name] = ''
             else:
