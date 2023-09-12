@@ -95,11 +95,19 @@ def get_requirement_version(package_name, dependency_name):
         package_data = importlib_metadata.metadata(package_name)
         req_dists = package_data.get_all('Requires-Dist') or []
         for package in req_dists:
-            name, version = package.split(' (')
-            version = \
-                version.replace('=', '').replace('>', '').replace('<', '') \
-                .replace(')', '').strip()
-            requirements[name] = version
+            try:
+                name, version = package.split(' (')
+            except ValueError as e:
+                print(
+                    f'Failed to parse the dependency version for {name} from {package}. '
+                    f'The version will not be set:\n{str(e)}'
+                )
+                requirements[name] = ''
+            else:
+                version = \
+                    version.replace('=', '').replace('>', '').replace('<', '') \
+                    .replace(')', '').strip()
+                requirements[name] = version
     else:
         for package in pkg_resources.parse_requirements(req):
             version = \
