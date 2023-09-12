@@ -93,16 +93,19 @@ def get_requirement_version(package_name, dependency_name):
     except FileNotFoundError:
         # try to get it from meta data
         package_data = importlib_metadata.metadata(package_name)
-        req_dists = package_data.get_all('Requires-Dist') or []
+        req_dists: List[str] = package_data.get_all('Requires-Dist') or []
         for package in req_dists:
             try:
-                name, version = package.split(' (')
+                if '(' in package:
+                    name, version = package.split(' (')
+                else:
+                    name, version = package.strip().split()
             except ValueError as e:
                 print(
-                    f'Failed to parse the dependency version for {package_name} '
+                    f'Failed to parse the dependency version for {dependency_name} '
                     f'from {package}. The version will not be set:\n{str(e)}'
                 )
-                requirements[name] = ''
+                requirements[dependency_name] = ''
             else:
                 version = \
                     version.replace('=', '').replace('>', '').replace('<', '') \
