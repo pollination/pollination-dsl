@@ -94,6 +94,7 @@ def get_requirement_version(package_name, dependency_name):
         # try to get it from meta data
         package_data = importlib_metadata.metadata(package_name)
         req_dists: List[str] = package_data.get_all('Requires-Dist') or []
+        version = -1
         for package in req_dists:
             try:
                 if '(' in package:
@@ -101,12 +102,28 @@ def get_requirement_version(package_name, dependency_name):
                 else:
                     name, version = package.strip().split()
             except ValueError as e:
-                print(
-                    f'Failed to parse the dependency version for {dependency_name} '
-                    f'from {package}. The version will not be set:\n{str(e)}'
-                )
-                requirements[dependency_name] = ''
-            else:
+                # Python 3.12
+                if 'not enough values to unpack' in str(e):
+                    if '=' in package:
+                        name, version = package.strip().split('=')
+                    elif '>' in package:
+                        name, version = package.strip().split('>')
+                    elif '<' in package:
+                        name, version = package.strip().split('<')
+                    else:
+                        print(
+                            f'Failed to parse the dependency version for {dependency_name} '
+                            f'from {package}. The version will not be set:\n{str(e)}'
+                        )
+                        requirements[dependency_name] = ''
+                else:
+                    print(
+                        f'Failed to parse the dependency version for {dependency_name} '
+                        f'from {package}. The version will not be set:\n{str(e)}'
+                    )
+                    requirements[dependency_name] = ''
+
+            if version != -1:
                 version = \
                     version.replace('=', '').replace('>', '').replace('<', '') \
                     .replace(')', '').strip()
@@ -146,7 +163,10 @@ def get_docker_image_from_dependency(package, dependency, owner, alias=None):
     image_name = alias if alias else dependency
     try:
         image_version = get_requirement_version(package, dependency)
-        image_id = f'{owner}/{image_name}:{image_version}'
+        if not image_version:
+            image_id = f'{owner}/{image_name}'
+        else:
+            image_id = f'{owner}/{image_name}:{image_version}'
     except (FileNotFoundError, AssertionError) as error:
         # this should not happen if the package is installed correctly
         # but Python has so many ways to store requirements based on how the package
@@ -155,7 +175,7 @@ def get_docker_image_from_dependency(package, dependency, owner, alias=None):
             f'Failed to pinpoint the version for {dependency} as a dependency for'
             f' {package}. Will set the docker version to latest.\n{error}'
         )
-        image_id = f'{owner}/{image_name}:latest'
+        image_id = f'{owner}/{image_name}'
 
     return image_id
 
