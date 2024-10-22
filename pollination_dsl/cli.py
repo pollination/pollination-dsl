@@ -78,7 +78,7 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
             from queenbee_luigi.recipe import Recipe
         except ImportError:
             # try pollination endpoint
-            url = 'https://utilities.pollination.cloud/to-luigi-archive'
+            url = 'https://utilities.pollination.solutions/to-luigi-archive'
             token = os.getenv('QB_POLLINATION_TOKEN')
             assert token is not None, \
                 'Pollination token is not set. Use QB_POLLINATION_TOKEN to set it as ' \
@@ -116,14 +116,14 @@ def translate_recipe(ctx, recipe_name, target_folder, queenbee, no_exit=False):
 @click.argument('package_name')
 @click.option(
     '-e', '--endpoint', help='Endpoint to push the resource.', show_default=True,
-    default='https://api.pollination.cloud'
+    default='https://api.pollination.solutions'
 )
 # TODO: Add better support for mapping different dependencies to different sources. For
 # now it is all set to the same value which is fine for our use cases.
 @click.option(
     '-src', '--source', help='A link to replace the source for dependencies. This value '
     'will overwrite the source value in recipe\'s dependencies files. By default it '
-    'will be set to https://api.pollination.cloud/registries'
+    'will be set to https://api.pollination.solutions/registries'
 )
 @click.option(
     '--public/--private', help='Indicate if the recipe or plugin should be created as '
@@ -206,7 +206,7 @@ def push_resource(
 
     # overwite resources in dependencies
     if resource_type == 'recipe':
-        source = source or 'https://api.pollination.cloud/registries'
+        source = source or 'https://api.pollination.solutions/registries'
         # update the value for source in dependencies.yaml file
         dep_file = pathlib.Path(folder, 'dependencies.yaml')
         data = yaml.safe_load(dep_file.read_bytes())
