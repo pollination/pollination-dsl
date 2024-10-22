@@ -1,0 +1,21 @@
+pollination\_dsl.dag package
+============================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pollination_dsl.dag.base
+   pollination_dsl.dag.inputs
+   pollination_dsl.dag.outputs
+   pollination_dsl.dag.task
+
+Module contents
+---------------
+
+.. automodule:: pollination_dsl.dag
+   :members:
+   :undoc-members:
+   :show-inheritance:
