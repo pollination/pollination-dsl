@@ -59,8 +59,8 @@ class _InputBase(BaseModel):
         """Convert this input to a Queenbee input."""
         func = _inputs_mapper[self.__class__.__name__]
 
+        annotations = self.annotations or {}
         if self.default_local:
-            annotations = self.annotations or {}
             annotations['__default_local__'] = self.default_local
 
         data = {
