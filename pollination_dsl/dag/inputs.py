@@ -32,6 +32,7 @@ class _InputBase(BaseModel):
     annotations: Dict = None
     description: str = None
     default: Any = None
+    default_local: Any = None
     spec: Dict = None
     alias: List[InputAliasTypes] = None
     optional: bool = False
@@ -57,12 +58,17 @@ class _InputBase(BaseModel):
     def to_queenbee(self, name):
         """Convert this input to a Queenbee input."""
         func = _inputs_mapper[self.__class__.__name__]
+
+        if self.default_local:
+            annotations = self.annotations or {}
+            annotations['__default_local__'] = self.default_local
+
         data = {
             'required': self.required,
             'name': name.replace('_', '-'),
             'default': self.default,
             'description': self.description,
-            'annotations': self.annotations,
+            'annotations': annotations,
             'spec': self.spec,
             'alias': [al.to_queenbee().dict() for al in self.alias]
         }
@@ -91,6 +97,8 @@ class GenericInput(_InputBase):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
@@ -105,11 +113,14 @@ class StringInput(GenericInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
     """
     default: str = None
+    default_local: str = None
 
 
 class IntegerInput(StringInput):
@@ -119,11 +130,14 @@ class IntegerInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
     """
     default: int = None
+    default_local: int = None
 
 
 class NumberInput(StringInput):
@@ -133,11 +147,14 @@ class NumberInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
     """
     default: float = None
+    default_local: float = None
 
 
 class BooleanInput(StringInput):
@@ -147,11 +164,14 @@ class BooleanInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
     """
     default: bool = None
+    default_local: bool = None
 
 
 class DictInput(StringInput):
@@ -161,11 +181,14 @@ class DictInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
     """
     default: Dict = None
+    default_local: Dict = None
 
 
 class ListInput(StringInput):
@@ -175,6 +198,8 @@ class ListInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         items_type: 'Type of items in list. All the items in an array must be from '
         'the same type.'
         spec: A JSONSchema specification to validate input values.
@@ -182,6 +207,7 @@ class ListInput(StringInput):
 
     """
     default: List = None
+    default_local: List = None
 
     items_type: ItemType = Field(
         ItemType.String,
@@ -197,6 +223,8 @@ class FolderInput(StringInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
 
@@ -217,6 +245,8 @@ class FileInput(FolderInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         extensions: An optional list of valid extensions for input file.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
@@ -236,6 +266,8 @@ class PathInput(FileInput):
         annotations: An optional annotation dictionary.
         description: Input description.
         default: Default value.
+        default_local: Default value for local runs. This value overwrites
+            the default value when the recipe is translated for local runs.
         extensions: An optional list of valid extensions for input file.
         spec: A JSONSchema specification to validate input values.
         alias: A list of aliases for this input in different platforms.
