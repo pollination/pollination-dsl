@@ -1,5 +1,5 @@
 from pollination_dsl.alias.outputs import OutputAliasTypes
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 from queenbee.io.outputs.dag import (
@@ -11,7 +11,7 @@ from queenbee.base.basemodel import BaseModel
 from queenbee.io.common import ItemType
 from queenbee.base.parser import parse_double_quotes_vars
 
-from pydantic import validator, Field
+from pydantic import field_validator, Field
 
 
 __all__ = ('Outputs', )
@@ -48,12 +48,15 @@ def _get_from(value, reference):
 class _OutputBase(BaseModel):
 
     source: Any  # this field will be translated to from_
-    annotations: Dict = None
-    description: str = None
-    alias: List[OutputAliasTypes] = None
+    description: Optional[str] = None
+    alias: Optional[List[OutputAliasTypes]] = Field(
+        default=None, 
+        validate_default=True
+    )
     optional: bool = False
 
-    @validator('source')
+    @field_validator('source')
+    @classmethod
     def change_self_to_inputs(cls, v):
         if isinstance(v, dict):
             return v
@@ -64,7 +67,8 @@ class _OutputBase(BaseModel):
             )
         return v
 
-    @validator('alias', always=True)
+    @field_validator('alias', mode='before')
+    @classmethod
     def empty_list_alias(cls, v):
         return v if v is not None else []
 
@@ -89,7 +93,7 @@ class _OutputBase(BaseModel):
             'from': _get_from(self.source, self.reference_type),
             'description': self.description,
             'annotations': self.annotations,
-            'alias': [al.to_queenbee().dict() for al in self.alias]
+            'alias': [al.to_queenbee().model_dump() for al in self.alias]
         }
 
         if hasattr(self, 'items_type'):
@@ -136,10 +140,11 @@ class StringOutput(GenericOutput):
     """
 
     source: Any  # this field will be translated to from_
-    annotations: Dict = None
-    description: str = None
+    annotations: Optional[Dict] = None
+    description: Optional[str] = None
 
-    @validator('source')
+    @field_validator('source')
+    @classmethod
     def change_self_to_inputs(cls, v):
         if isinstance(v, dict):
             return v

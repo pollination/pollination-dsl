@@ -1,6 +1,5 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-from pydantic.errors import TupleError
 from queenbee.io.inputs.function import (
     FunctionStringInput, FunctionIntegerInput, FunctionNumberInput,
     FunctionBooleanInput, FunctionFolderInput, FunctionFileInput,
@@ -26,10 +25,10 @@ _inputs_mapper = {
 
 class _InputBase(BaseModel):
 
-    annotations: Dict = None
-    description: Any = None
-    default: str = None
-    spec: Dict = None
+    annotations: Optional[Dict] = None
+    description: Optional[Any] = None
+    default: Optional[str] = None
+    spec: Optional[Dict] = None
     optional: bool = False
 
     @property
@@ -64,7 +63,8 @@ class _InputBase(BaseModel):
         if hasattr(self, 'extensions'):
             data['extensions'] = self.extensions
 
-        return func.parse_obj(data)
+        # Pydantic V2: parse_obj() has been replaced by model_validate()
+        return func.model_validate(data)
 
 
 class StringInput(_InputBase):
@@ -77,7 +77,7 @@ class StringInput(_InputBase):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: str = None
+    default: Optional[str] = None
 
 
 class IntegerInput(StringInput):
@@ -90,7 +90,7 @@ class IntegerInput(StringInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: int = None
+    default: Optional[int] = None
 
 
 class NumberInput(StringInput):
@@ -103,7 +103,7 @@ class NumberInput(StringInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: float = None
+    default: Optional[float] = None
 
 
 class BooleanInput(StringInput):
@@ -116,7 +116,7 @@ class BooleanInput(StringInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: bool = None
+    default: Optional[bool] = None
 
 
 class DictInput(StringInput):
@@ -129,7 +129,7 @@ class DictInput(StringInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: Dict = None
+    default: Optional[Dict] = None
 
 
 class ListInput(StringInput):
@@ -144,10 +144,10 @@ class ListInput(StringInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    default: List = None
+    default: Optional[List] = None
 
     items_type: ItemType = Field(
-        ItemType.String,
+        default=ItemType.String,
         description='Type of items in an array. All the items in an array must be from '
         'the same type.'
     )
@@ -179,7 +179,7 @@ class FileInput(FolderInput):
         spec: A JSONSchema specification to validate input values.
 
     """
-    extensions: List[str] = None
+    extensions: Optional[List[str]] = None
 
 
 class PathInput(FileInput):

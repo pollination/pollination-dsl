@@ -1,11 +1,12 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
+from pydantic import field_validator
 from queenbee.io.inputs.dag import (
     DAGGenericInput, DAGStringInput, DAGIntegerInput, DAGNumberInput,
     DAGBooleanInput, DAGFolderInput, DAGFileInput, DAGPathInput,
     DAGJSONObjectInput, DAGArrayInput
 )
-from queenbee.base.basemodel import BaseModel, Field, validator
+from queenbee.base.basemodel import BaseModel, Field
 from queenbee.io.common import ItemType
 
 from ..alias.inputs import InputAliasTypes
@@ -29,15 +30,18 @@ _inputs_mapper = {
 
 class _InputBase(BaseModel):
 
-    annotations: Dict = None
     description: str = None
     default: Any = None
     default_local: Any = None
     spec: Dict = None
-    alias: List[InputAliasTypes] = None
+    alias: Optional[List[InputAliasTypes]] = Field(
+        default=None,
+        validate_default=True
+    )
     optional: bool = False
 
-    @validator('alias', always=True)
+    @field_validator('alias', mode='before')
+    @classmethod
     def empty_list_alias(cls, v):
         return v if v is not None else []
 
@@ -70,7 +74,7 @@ class _InputBase(BaseModel):
             'description': self.description,
             'annotations': annotations,
             'spec': self.spec,
-            'alias': [al.to_queenbee().dict() for al in self.alias]
+            'alias': [al.to_queenbee().model_dump() for al in self.alias]
         }
 
         if hasattr(self, 'extensions'):
@@ -79,7 +83,7 @@ class _InputBase(BaseModel):
         if hasattr(self, 'items_type'):
             data['items_type'] = self.items_type
 
-        return func.parse_obj(data)
+        return func.model_validate(data)
 
     @property
     def is_artifact(self):
@@ -119,8 +123,8 @@ class StringInput(GenericInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: str = None
-    default_local: str = None
+    default: Optional[str] = None
+    default_local: Optional[str] = None
 
 
 class IntegerInput(StringInput):
@@ -136,8 +140,8 @@ class IntegerInput(StringInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: int = None
-    default_local: int = None
+    default: Optional[int] = None
+    default_local: Optional[int] = None
 
 
 class NumberInput(StringInput):
@@ -153,8 +157,8 @@ class NumberInput(StringInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: float = None
-    default_local: float = None
+    default: Optional[float] = None
+    default_local: Optional[float] = None
 
 
 class BooleanInput(StringInput):
@@ -170,8 +174,8 @@ class BooleanInput(StringInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: bool = None
-    default_local: bool = None
+    default: Optional[bool] = None
+    default_local: Optional[bool] = None
 
 
 class DictInput(StringInput):
@@ -187,8 +191,8 @@ class DictInput(StringInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: Dict = None
-    default_local: Dict = None
+    default: Optional[Dict] = None
+    default_local: Optional[Dict] = None
 
 
 class ListInput(StringInput):
@@ -206,11 +210,11 @@ class ListInput(StringInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    default: List = None
-    default_local: List = None
+    default: Optional[List] = None
+    default_local: Optional[List] = None
 
     items_type: ItemType = Field(
-        ItemType.String,
+        default=ItemType.String,
         description='Type of items in an array. All the items in an array must be from '
         'the same type.'
     )
@@ -252,7 +256,7 @@ class FileInput(FolderInput):
         alias: A list of aliases for this input in different platforms.
 
     """
-    extensions: List[str] = None
+    extensions: Optional[List[str]] = None
 
     @property
     def reference_type(self):

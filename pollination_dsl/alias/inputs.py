@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 from dataclasses import dataclass
+from pydantic import field_validator
 from queenbee.io.inputs.alias import DAGGenericInputAlias, DAGStringInputAlias, \
     DAGIntegerInputAlias, DAGNumberInputAlias, DAGBooleanInputAlias, \
     DAGJSONObjectInputAlias, DAGArrayInputAlias, DAGFileInputAlias, \
     DAGFolderInputAlias, DAGPathInputAlias, DAGLinkedInputAlias
-from queenbee.base.basemodel import BaseModel, Field, validator
+from queenbee.base.basemodel import BaseModel, Field
 from queenbee.io.common import ItemType, IOAliasHandler
 
 
@@ -28,10 +29,10 @@ _inputs_mapper = {
 class _InputAliasBase(BaseModel):
 
     name: str = Field(...)
-    annotations: Dict = None
-    description: str = None
+    annotations: Optional[Dict] = None
+    description: Optional[str] = None
     default: Any = None
-    spec: Dict = None
+    spec: Optional[Dict] = None
     optional: bool = False
     platform: List[str] = Field(
         ...,
@@ -40,12 +41,14 @@ class _InputAliasBase(BaseModel):
         'developer and author of the recipe.'
     )
 
-    handler: List[IOAliasHandler] = Field(
-        None,
-        description='List of process actions to process the input or output value.'
+    handler: Optional[List[IOAliasHandler]] = Field(
+        default=None,
+        description='List of process actions to process the input or output value.',
+        validate_default=True
     )
 
-    @validator('handler', always=True)
+    @field_validator('handler', mode='before')
+    @classmethod
     def create_empty_list(cls, v):
         return [] if v is None else v
 
@@ -69,7 +72,7 @@ class _InputAliasBase(BaseModel):
             'annotations': self.annotations,
             'spec': self.spec,
             'platform': self.platform,
-            'handler': [h.dict() for h in self.handler]
+            'handler': [h.model_dump() for h in self.handler]
         }
 
         if hasattr(self, 'extensions'):
@@ -78,7 +81,7 @@ class _InputAliasBase(BaseModel):
         if hasattr(self, 'items_type'):
             data['items_type'] = self.items_type
 
-        return func.parse_obj(data)
+        return func.model_validate(data)
 
     @property
     def is_artifact(self):
@@ -118,7 +121,14 @@ class StringInputAlias(GenericInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: str = None
+    default: Optional[str] = None
+
+    @field_validator('default', mode='before')
+    @classmethod
+    def coerce_default_to_str(cls, v):
+        if v is not None:
+            return str(v)
+        return v
 
 
 class LinkedInputAlias(StringInputAlias):
@@ -154,7 +164,7 @@ class IntegerInputAlias(StringInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: int = None
+    default: Optional[int] = None
 
 
 class NumberInputAlias(StringInputAlias):
@@ -172,7 +182,7 @@ class NumberInputAlias(StringInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: float = None
+    default: Optional[float] = None
 
 
 class BooleanInputAlias(StringInputAlias):
@@ -190,7 +200,7 @@ class BooleanInputAlias(StringInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: bool = None
+    default: Optional[bool] = None
 
 
 class DictInputAlias(StringInputAlias):
@@ -208,7 +218,7 @@ class DictInputAlias(StringInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: Dict = None
+    default: Optional[Dict] = None
 
 
 class ListInputAlias(StringInputAlias):
@@ -228,10 +238,10 @@ class ListInputAlias(StringInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    default: List = None
+    default: Optional[List] = None
 
     items_type: ItemType = Field(
-        ItemType.String,
+        default=ItemType.String,
         description='Type of items in an array. All the items in an array must be from '
         'the same type.'
     )
@@ -273,7 +283,7 @@ class FileInputAlias(FolderInputAlias):
         handler: List of process actions to process the input or output value.
 
     """
-    extensions: List[str] = None
+    extensions: Optional[List[str]] = None
 
 
 class PathInputAlias(FileInputAlias):
