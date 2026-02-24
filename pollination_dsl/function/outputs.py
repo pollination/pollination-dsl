@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from queenbee.io.outputs.function import (
     FunctionStringOutput, FunctionIntegerOutput, FunctionNumberOutput,
@@ -9,7 +9,7 @@ from queenbee.io.common import ItemType
 from queenbee.base.basemodel import BaseModel
 from queenbee.base.parser import parse_double_quotes_vars
 
-from pydantic import validator, Field
+from pydantic import field_validator, Field
 
 
 __all__ = ('Outputs', )
@@ -30,11 +30,12 @@ _outputs_mapper = {
 class _OutputBase(BaseModel):
 
     path: str
-    annotations: Dict = None
-    description: str = None
+    annotations: Optional[Dict] = None
+    description: Optional[str] = None
     optional: bool = False
 
-    @validator('path')
+    @field_validator('path')
+    @classmethod
     def change_self_to_inputs(cls, v):
         refs = parse_double_quotes_vars(v)
         for ref in refs:
@@ -69,7 +70,7 @@ class _OutputBase(BaseModel):
         if hasattr(self, 'items_type'):
             data['items_type'] = self.items_type
 
-        return func.parse_obj(data)
+        return func.model_validate(data)
 
     @property
     def is_artifact(self):
@@ -150,7 +151,7 @@ class ListOutput(StringOutput):
 
     """
     items_type: ItemType = Field(
-        ItemType.String,
+        default=ItemType.String,
         description='Type of items in this array. All the items in an array must be '
         'from the same type.'
     )

@@ -1,3 +1,3 @@
-queenbee-pollination==0.7.10
-queenbee-local>=0.6.7
+queenbee-pollination==1.0.0
+queenbee-local>=1.0.0
 importlib-metadata>=6.6.0

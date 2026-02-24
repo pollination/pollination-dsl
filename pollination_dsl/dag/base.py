@@ -3,7 +3,6 @@ import inspect
 import warnings
 
 from queenbee.recipe.dag import DAG as QBDAG
-from queenbee.recipe.recipe import TemplateFunction
 from ..common import _BaseClass
 
 

@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 from dataclasses import dataclass
 
 # Add alias to everything
@@ -8,10 +8,10 @@ from queenbee.io.outputs.alias import (
     DAGFileOutputAlias, DAGPathOutputAlias, DAGJSONObjectOutputAlias,
     DAGArrayOutputAlias, DAGLinkedOutputAlias
 )
-from queenbee.base.basemodel import BaseModel, validator
+from queenbee.base.basemodel import BaseModel
 from queenbee.io.common import ItemType, IOAliasHandler
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 __all__ = ('Outputs', )
@@ -47,8 +47,8 @@ def _get_from(value, reference):
 
 class _OutputAliasBase(BaseModel):
     name: str = Field(...)
-    annotations: Dict = None
-    description: str = None
+    annotations: Optional[Dict] = None
+    description: Optional[str] = None
     optional: bool = False
 
     platform: List[str] = Field(
@@ -58,12 +58,14 @@ class _OutputAliasBase(BaseModel):
         'developer and author of the recipe.'
     )
 
-    handler: List[IOAliasHandler] = Field(
-        None,
-        description='List of process actions to process the input or output value.'
+    handler: Optional[List[IOAliasHandler]] = Field(
+        default=None,
+        description='List of process actions to process the input or output value.',
+        validate_default=True
     )
 
-    @validator('handler', always=True)
+    @field_validator('handler', mode='before')
+    @classmethod
     def create_empty_list(cls, v):
         return [] if v is None else v
 
@@ -83,13 +85,13 @@ class _OutputAliasBase(BaseModel):
             'description': self.description,
             'annotations': self.annotations,
             'platform': self.platform,
-            'handler': [h.dict() for h in self.handler]
+            'handler': [h.model_dump() for h in self.handler]
         }
 
         if hasattr(self, 'items_type'):
             data['items_type'] = self.items_type
 
-        return func.parse_obj(data)
+        return func.model_validate(data)
 
     @property
     def is_artifact(self):
@@ -222,7 +224,7 @@ class ListOutputAlias(StringOutputAlias):
 
     """
     items_type: ItemType = Field(
-        ItemType.String,
+        default=ItemType.String,
         description='Type of items in this array. All the items in an array must be '
         'from the same type.'
     )
