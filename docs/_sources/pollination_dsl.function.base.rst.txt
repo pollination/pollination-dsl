@@ -1,0 +1,7 @@
+pollination\_dsl.function.base module
+=====================================
+
+.. automodule:: pollination_dsl.function.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,19 @@
+pollination\_dsl.alias package
+==============================
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pollination_dsl.alias.inputs
+   pollination_dsl.alias.outputs
+
+Module contents
+---------------
+
+.. automodule:: pollination_dsl.alias
+   :members:
+   :undoc-members:
+   :show-inheritance:

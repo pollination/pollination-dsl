@@ -1,0 +1,7 @@
+pollination\_dsl.package module
+===============================
+
+.. automodule:: pollination_dsl.package
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,30 @@
+pollination\_dsl package
+========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pollination_dsl.alias
+   pollination_dsl.dag
+   pollination_dsl.function
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pollination_dsl.cli
+   pollination_dsl.common
+   pollination_dsl.package
+
+Module contents
+---------------
+
+.. automodule:: pollination_dsl
+   :members:
+   :undoc-members:
+   :show-inheritance:

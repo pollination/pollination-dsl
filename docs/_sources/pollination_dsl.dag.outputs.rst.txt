@@ -1,0 +1,7 @@
+pollination\_dsl.dag.outputs module
+===================================
+
+.. automodule:: pollination_dsl.dag.outputs
+   :members:
+   :undoc-members:
+   :show-inheritance:
