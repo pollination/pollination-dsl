@@ -27,7 +27,7 @@ jobs:
         run:
           npm install @semantic-release/exec
       - name: run semantic release
-        run:
+        run: |
           nextRelease="`npx semantic-release@^23.1.1 --dryRun | grep -oP 'Published release \K.*? ' || true`"
           npx semantic-release@^23.1.1
           echo "tag=$nextRelease" >> $GITHUB_OUTPUT
