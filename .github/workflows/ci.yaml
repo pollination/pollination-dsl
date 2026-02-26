@@ -15,9 +15,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: set up node  # we need node for for semantic release
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v4
         with:
-          node-version: 14.2.0
+          node-version: 22.2.0
       - name: install python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -28,7 +28,9 @@ jobs:
           npm install @semantic-release/exec
       - name: run semantic release
         run:
-          npx semantic-release@^17.0.0
+          nextRelease="`npx semantic-release@^23.1.1 --dryRun | grep -oP 'Published release \K.*? ' || true`"
+          npx semantic-release@^23.1.1
+          echo "tag=$nextRelease" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYPI_USERNAME: ${{ secrets.POLLINATION_PYPI_USERNAME }}
