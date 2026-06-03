@@ -104,12 +104,19 @@ def get_requirement_version(package_name, dependency_name):
             except ValueError as e:
                 # Python 3.12
                 if 'not enough values to unpack' in str(e):
-                    if '=' in package:
-                        name, version = package.strip().split('=')
-                    elif '>' in package:
-                        name, version = package.strip().split('>')
-                    elif '<' in package:
-                        name, version = package.strip().split('<')
+                    cleaned_package = package.strip()
+                    if '==' in cleaned_package:
+                        name, _, version = cleaned_package.partition('==')
+                    elif '>=' in cleaned_package:
+                        name, _, version = cleaned_package.partition('>=')
+                    elif '<=' in cleaned_package:
+                        name, _, version = cleaned_package.partition('<=')
+                    elif '=' in cleaned_package:
+                        name, _, version = cleaned_package.partition('=')
+                    elif '>' in cleaned_package:
+                        name, _, version = cleaned_package.partition('>')
+                    elif '<' in cleaned_package:
+                        name, _, version = cleaned_package.partition('<')
                     else:
                         print(
                             f'Failed to parse the dependency version for {dependency_name} '
