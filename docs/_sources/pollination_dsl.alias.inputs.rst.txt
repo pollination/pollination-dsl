@@ -1,0 +1,7 @@
+pollination\_dsl.alias.inputs module
+====================================
+
+.. automodule:: pollination_dsl.alias.inputs
+   :members:
+   :undoc-members:
+   :show-inheritance:

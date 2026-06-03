@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>pollination_dsl.dag.base module &#8212; pollination-dsl  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=0bf093e7" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pollination_dsl.dag.inputs module" href="pollination_dsl.dag.inputs.html" />
+    <link rel="prev" title="pollination_dsl.dag package" href="pollination_dsl.dag.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          pollination-dsl</a>
+        <span class="navbar-text navbar-version pull-left"><b></b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pollination_dsl.html">pollination_dsl package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pollination_dsl.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.alias.html">pollination_dsl.alias package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.alias.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.alias.inputs.html">pollination_dsl.alias.inputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs"><code class="docutils literal notranslate"><span class="pre">Inputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.any"><code class="docutils literal notranslate"><span class="pre">Inputs.any</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.bool"><code class="docutils literal notranslate"><span class="pre">Inputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.dict"><code class="docutils literal notranslate"><span class="pre">Inputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.file"><code class="docutils literal notranslate"><span class="pre">Inputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.float"><code class="docutils literal notranslate"><span class="pre">Inputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.folder"><code class="docutils literal notranslate"><span class="pre">Inputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.int"><code class="docutils literal notranslate"><span class="pre">Inputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.linked"><code class="docutils literal notranslate"><span class="pre">Inputs.linked</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.list"><code class="docutils literal notranslate"><span class="pre">Inputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.path"><code class="docutils literal notranslate"><span class="pre">Inputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.inputs.html#pollination_dsl.alias.inputs.Inputs.str"><code class="docutils literal notranslate"><span class="pre">Inputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.alias.outputs.html">pollination_dsl.alias.outputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs"><code class="docutils literal notranslate"><span class="pre">Outputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.any"><code class="docutils literal notranslate"><span class="pre">Outputs.any</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.bool"><code class="docutils literal notranslate"><span class="pre">Outputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.dict"><code class="docutils literal notranslate"><span class="pre">Outputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.file"><code class="docutils literal notranslate"><span class="pre">Outputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.float"><code class="docutils literal notranslate"><span class="pre">Outputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.folder"><code class="docutils literal notranslate"><span class="pre">Outputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.int"><code class="docutils literal notranslate"><span class="pre">Outputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.linked"><code class="docutils literal notranslate"><span class="pre">Outputs.linked</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.list"><code class="docutils literal notranslate"><span class="pre">Outputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.path"><code class="docutils literal notranslate"><span class="pre">Outputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.alias.outputs.html#pollination_dsl.alias.outputs.Outputs.str"><code class="docutils literal notranslate"><span class="pre">Outputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.alias.html#module-pollination_dsl.alias">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="pollination_dsl.dag.html">pollination_dsl.dag package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pollination_dsl.dag.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">pollination_dsl.dag.base module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.DAG"><code class="docutils literal notranslate"><span class="pre">DAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG.queenbee"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._dependencies"><code class="docutils literal notranslate"><span class="pre">DAG._dependencies</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._inputs"><code class="docutils literal notranslate"><span class="pre">DAG._inputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._outputs"><code class="docutils literal notranslate"><span class="pre">DAG._outputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._package"><code class="docutils literal notranslate"><span class="pre">DAG._package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._python_package"><code class="docutils literal notranslate"><span class="pre">DAG._python_package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG"><code class="docutils literal notranslate"><span class="pre">GroupedDAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG.queenbee"><code class="docutils literal notranslate"><span class="pre">GroupedDAG.queenbee</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.inputs.html">pollination_dsl.dag.inputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs"><code class="docutils literal notranslate"><span class="pre">Inputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.any"><code class="docutils literal notranslate"><span class="pre">Inputs.any</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.bool"><code class="docutils literal notranslate"><span class="pre">Inputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.dict"><code class="docutils literal notranslate"><span class="pre">Inputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.file"><code class="docutils literal notranslate"><span class="pre">Inputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.float"><code class="docutils literal notranslate"><span class="pre">Inputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.folder"><code class="docutils literal notranslate"><span class="pre">Inputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.int"><code class="docutils literal notranslate"><span class="pre">Inputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.list"><code class="docutils literal notranslate"><span class="pre">Inputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.path"><code class="docutils literal notranslate"><span class="pre">Inputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.inputs.html#pollination_dsl.dag.inputs.Inputs.str"><code class="docutils literal notranslate"><span class="pre">Inputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.outputs.html">pollination_dsl.dag.outputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs"><code class="docutils literal notranslate"><span class="pre">Outputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.any"><code class="docutils literal notranslate"><span class="pre">Outputs.any</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.bool"><code class="docutils literal notranslate"><span class="pre">Outputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.dict"><code class="docutils literal notranslate"><span class="pre">Outputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.file"><code class="docutils literal notranslate"><span class="pre">Outputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.float"><code class="docutils literal notranslate"><span class="pre">Outputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.folder"><code class="docutils literal notranslate"><span class="pre">Outputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.int"><code class="docutils literal notranslate"><span class="pre">Outputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.list"><code class="docutils literal notranslate"><span class="pre">Outputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.path"><code class="docutils literal notranslate"><span class="pre">Outputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.dag.outputs.html#pollination_dsl.dag.outputs.Outputs.str"><code class="docutils literal notranslate"><span class="pre">Outputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.task.html">pollination_dsl.dag.task module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.dag.task.html#pollination_dsl.dag.task.task"><code class="docutils literal notranslate"><span class="pre">task()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.dag.html#module-pollination_dsl.dag">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.function.html">pollination_dsl.function package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.function.html#submodules">Submodules</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.function.base.html">pollination_dsl.function.base module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function"><code class="docutils literal notranslate"><span class="pre">Function</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function.queenbee"><code class="docutils literal notranslate"><span class="pre">Function.queenbee</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function._dependencies"><code class="docutils literal notranslate"><span class="pre">Function._dependencies</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function._inputs"><code class="docutils literal notranslate"><span class="pre">Function._inputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function._outputs"><code class="docutils literal notranslate"><span class="pre">Function._outputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function._package"><code class="docutils literal notranslate"><span class="pre">Function._package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.Function._python_package"><code class="docutils literal notranslate"><span class="pre">Function._python_package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.base.html#id0"><code class="docutils literal notranslate"><span class="pre">Function.queenbee</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.command"><code class="docutils literal notranslate"><span class="pre">command()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.function.base.html#pollination_dsl.function.base.script"><code class="docutils literal notranslate"><span class="pre">script()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.function.inputs.html">pollination_dsl.function.inputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs"><code class="docutils literal notranslate"><span class="pre">Inputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.bool"><code class="docutils literal notranslate"><span class="pre">Inputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.dict"><code class="docutils literal notranslate"><span class="pre">Inputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.file"><code class="docutils literal notranslate"><span class="pre">Inputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.float"><code class="docutils literal notranslate"><span class="pre">Inputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.folder"><code class="docutils literal notranslate"><span class="pre">Inputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.int"><code class="docutils literal notranslate"><span class="pre">Inputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.list"><code class="docutils literal notranslate"><span class="pre">Inputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.path"><code class="docutils literal notranslate"><span class="pre">Inputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.inputs.html#pollination_dsl.function.inputs.Inputs.str"><code class="docutils literal notranslate"><span class="pre">Inputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.function.outputs.html">pollination_dsl.function.outputs module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs"><code class="docutils literal notranslate"><span class="pre">Outputs</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.bool"><code class="docutils literal notranslate"><span class="pre">Outputs.bool</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.dict"><code class="docutils literal notranslate"><span class="pre">Outputs.dict</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.file"><code class="docutils literal notranslate"><span class="pre">Outputs.file</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.float"><code class="docutils literal notranslate"><span class="pre">Outputs.float</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.folder"><code class="docutils literal notranslate"><span class="pre">Outputs.folder</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.int"><code class="docutils literal notranslate"><span class="pre">Outputs.int</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.list"><code class="docutils literal notranslate"><span class="pre">Outputs.list</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.path"><code class="docutils literal notranslate"><span class="pre">Outputs.path</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="pollination_dsl.function.outputs.html#pollination_dsl.function.outputs.Outputs.str"><code class="docutils literal notranslate"><span class="pre">Outputs.str</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.function.html#module-pollination_dsl.function">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.cli.html">pollination_dsl.cli module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.common.html">pollination_dsl.common module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.common.html#pollination_dsl.common.camel_to_snake"><code class="docutils literal notranslate"><span class="pre">camel_to_snake()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.common.html#pollination_dsl.common.get_docker_image_from_dependency"><code class="docutils literal notranslate"><span class="pre">get_docker_image_from_dependency()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.common.html#pollination_dsl.common.get_requirement_version"><code class="docutils literal notranslate"><span class="pre">get_requirement_version()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.common.html#pollination_dsl.common.import_module"><code class="docutils literal notranslate"><span class="pre">import_module()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.common.html#pollination_dsl.common.name_to_pollination"><code class="docutils literal notranslate"><span class="pre">name_to_pollination()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.package.html">pollination_dsl.package module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.package.html#pollination_dsl.package.load"><code class="docutils literal notranslate"><span class="pre">load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.package.html#pollination_dsl.package.package"><code class="docutils literal notranslate"><span class="pre">package()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.package.html#pollination_dsl.package.package_recipe_dependencies"><code class="docutils literal notranslate"><span class="pre">package_recipe_dependencies()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.package.html#pollination_dsl.package.translate"><code class="docutils literal notranslate"><span class="pre">translate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#module-pollination_dsl">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pollination_dsl.html">pollination_dsl package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pollination_dsl.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.alias.html">pollination_dsl.alias package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pollination_dsl.dag.html">pollination_dsl.dag package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pollination_dsl.dag.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">pollination_dsl.dag.base module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.DAG"><code class="docutils literal notranslate"><span class="pre">DAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG.queenbee"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._dependencies"><code class="docutils literal notranslate"><span class="pre">DAG._dependencies</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._inputs"><code class="docutils literal notranslate"><span class="pre">DAG._inputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._outputs"><code class="docutils literal notranslate"><span class="pre">DAG._outputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._package"><code class="docutils literal notranslate"><span class="pre">DAG._package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._python_package"><code class="docutils literal notranslate"><span class="pre">DAG._python_package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG"><code class="docutils literal notranslate"><span class="pre">GroupedDAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG.queenbee"><code class="docutils literal notranslate"><span class="pre">GroupedDAG.queenbee</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.inputs.html">pollination_dsl.dag.inputs module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.outputs.html">pollination_dsl.dag.outputs module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.task.html">pollination_dsl.dag.task module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.dag.html#module-pollination_dsl.dag">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.function.html">pollination_dsl.function package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#module-pollination_dsl">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="pollination_dsl.dag.html" title="Previous Chapter: pollination_dsl.dag package"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; pollination_d...</span>
+    </a>
+  </li>
+  <li>
+    <a href="pollination_dsl.dag.inputs.html" title="Next Chapter: pollination_dsl.dag.inputs module"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">pollination_d... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/pollination_dsl.dag.base.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pollination_dsl.html">pollination_dsl package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pollination_dsl.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.alias.html">pollination_dsl.alias package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="pollination_dsl.dag.html">pollination_dsl.dag package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="pollination_dsl.dag.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">pollination_dsl.dag.base module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.DAG"><code class="docutils literal notranslate"><span class="pre">DAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG.queenbee"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._dependencies"><code class="docutils literal notranslate"><span class="pre">DAG._dependencies</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._inputs"><code class="docutils literal notranslate"><span class="pre">DAG._inputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._outputs"><code class="docutils literal notranslate"><span class="pre">DAG._outputs</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._package"><code class="docutils literal notranslate"><span class="pre">DAG._package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.DAG._python_package"><code class="docutils literal notranslate"><span class="pre">DAG._python_package</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">DAG.queenbee</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG"><code class="docutils literal notranslate"><span class="pre">GroupedDAG</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#pollination_dsl.dag.base.GroupedDAG.queenbee"><code class="docutils literal notranslate"><span class="pre">GroupedDAG.queenbee</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.inputs.html">pollination_dsl.dag.inputs module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.outputs.html">pollination_dsl.dag.outputs module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="pollination_dsl.dag.task.html">pollination_dsl.dag.task module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pollination_dsl.dag.html#module-pollination_dsl.dag">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pollination_dsl.function.html">pollination_dsl.function package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pollination_dsl.html#module-pollination_dsl">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
+      
+  <section id="module-pollination_dsl.dag.base">
+<span id="pollination-dsl-dag-base-module"></span><h1>pollination_dsl.dag.base module<a class="headerlink" href="#module-pollination_dsl.dag.base" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pollination_dsl.dag.base.</span></span><span class="sig-name descname"><span class="pre">DAG</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_BaseClass</span></code></p>
+<p>Baseclass for DSL DAG classes.</p>
+<p>Every Queenbee DAG must subclass from this class.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG.queenbee">
+<span class="sig-name descname"><span class="pre">queenbee</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG.queenbee" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG._dependencies">
+<span class="sig-name descname"><span class="pre">_dependencies</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG._dependencies" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG._inputs">
+<span class="sig-name descname"><span class="pre">_inputs</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG._inputs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG._outputs">
+<span class="sig-name descname"><span class="pre">_outputs</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG._outputs" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG._package">
+<span class="sig-name descname"><span class="pre">_package</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG._package" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.DAG._python_package">
+<span class="sig-name descname"><span class="pre">_python_package</span></span><a class="headerlink" href="#pollination_dsl.dag.base.DAG._python_package" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">queenbee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DAG</span></em><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd><p>Convert this class to a Queenbee DAG.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.GroupedDAG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pollination_dsl.dag.base.</span></span><span class="sig-name descname"><span class="pre">GroupedDAG</span></span><a class="headerlink" href="#pollination_dsl.dag.base.GroupedDAG" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pollination_dsl.dag.base.DAG" title="pollination_dsl.dag.base.DAG"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAG</span></code></a></p>
+<p>A grouped DAG is a special DAG that will be executed on the same Pod.</p>
+<p>Grouped DAG is useful to group similar small tasks together to run them faster.
+Unlike the default DAG, the tasks in group DAG cannot have a for loop.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pollination_dsl.dag.base.GroupedDAG.queenbee">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">queenbee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DAG</span></em><a class="headerlink" href="#pollination_dsl.dag.base.GroupedDAG.queenbee" title="Link to this definition">¶</a></dt>
+<dd><p>Convert this class to a Queenbee DAG.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2026, Pollination.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 8.0.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

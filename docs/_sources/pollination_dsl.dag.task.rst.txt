@@ -1,0 +1,7 @@
+pollination\_dsl.dag.task module
+================================
+
+.. automodule:: pollination_dsl.dag.task
+   :members:
+   :undoc-members:
+   :show-inheritance:

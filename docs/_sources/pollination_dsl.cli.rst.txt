@@ -1,0 +1,7 @@
+pollination\_dsl.cli module
+===========================
+
+.. automodule:: pollination_dsl.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
